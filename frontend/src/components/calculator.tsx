@@ -101,6 +101,7 @@ const Calculator= ({back_odds, lay_odds}:{back_odds: number,  lay_odds: number})
                 <Typography variant='body1'>
                     Bet {back_stake.toFixed(2)} at odds of {back_odds_input}
                 </Typography>
+                
             </Box>
             <Box sx={{minHeight: '80px', minWidth: '100px', }}>
                 <Typography variant='h5'>
@@ -120,6 +121,9 @@ const Calculator= ({back_odds, lay_odds}:{back_odds: number,  lay_odds: number})
                 />
                 <Typography variant='body1'>
                    Lay {lay_stake.toFixed(2)} at odds of {lay_odds_input} 
+                </Typography>
+                <Typography variant='subtitle2'>
+                    Liability: {liability.toFixed(2)}
                 </Typography>
             </Box>
         </Box>
