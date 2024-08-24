@@ -102,7 +102,6 @@ const BasicTable: React.FC = () => {
               <TableCell align="right">Odds</TableCell>
               <TableCell align="right">Exchange</TableCell>
               <TableCell align="right">Lay</TableCell>
-              <TableCell align="right">Avail</TableCell>
               <TableCell align="right">Calc</TableCell>
             </TableRow>
           </TableHead>
@@ -118,7 +117,6 @@ const BasicTable: React.FC = () => {
                 <TableCell align="right">{row.odds}</TableCell>
                 <TableCell align="right">{row.exchange}</TableCell>
                 <TableCell align="right">{row.lay}</TableCell>
-                <TableCell align="right">{row.avail}</TableCell>
                 <TableCell align="right"><Button onClick={()=>{
                   setBackOdds(row.odds)
                     setLayOdds(row.lay)

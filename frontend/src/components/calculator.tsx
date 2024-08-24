@@ -99,7 +99,7 @@ const Calculator= ({back_odds, lay_odds}:{back_odds: number,  lay_odds: number})
                     onChange={event => setBookmaker_com(parseInt((event.target.value)))}
                 />
                 <Typography variant='body1'>
-                    Bet {back_stake} at odds of {back_odds_input}
+                    Bet {back_stake.toFixed(2)} at odds of {back_odds_input}
                 </Typography>
             </Box>
             <Box sx={{minHeight: '80px', minWidth: '100px', }}>
@@ -119,7 +119,7 @@ const Calculator= ({back_odds, lay_odds}:{back_odds: number,  lay_odds: number})
                     onChange={event => setExchange_com(parseInt((event.target.value)))}
                 />
                 <Typography variant='body1'>
-                   Lay {lay_stake} at odds of {lay_odds_input} 
+                   Lay {lay_stake.toFixed(2)} at odds of {lay_odds_input} 
                 </Typography>
             </Box>
         </Box>
@@ -136,15 +136,15 @@ const Calculator= ({back_odds, lay_odds}:{back_odds: number,  lay_odds: number})
                 <TableBody>
                     <TableRow>
                         <TableCell>Bookmaker bet(back) wins</TableCell>
-                        <TableCell>{back_win.bookmaker}</TableCell>
-                        <TableCell>{back_win.exchange}</TableCell>
-                        <TableCell>{back_win.profit}</TableCell>
+                        <TableCell>{back_win.bookmaker.toFixed(2)}</TableCell>
+                        <TableCell>{back_win.exchange.toFixed(2)}</TableCell>
+                        <TableCell>{back_win.profit.toFixed(2)}</TableCell>
                     </TableRow>
                     <TableRow>
                         <TableCell>Exchange bet(lay) wins</TableCell>
-                        <TableCell>{lay_win.bookmaker}</TableCell>
-                        <TableCell>{lay_win.exchange}</TableCell>
-                        <TableCell>{lay_win.profit}</TableCell>
+                        <TableCell>{lay_win.bookmaker.toFixed(2)}</TableCell>
+                        <TableCell>{lay_win.exchange.toFixed(2)}</TableCell>
+                        <TableCell>{lay_win.profit.toFixed(2)}</TableCell>
                     </TableRow>
                 </TableBody>
             </Table>
