@@ -44,6 +44,9 @@ importers:
       axios:
         specifier: ^1.7.4
         version: 1.7.4
+      humanize-duration-ts:
+        specifier: ^2.1.1
+        version: 2.1.1
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -3124,6 +3127,9 @@ packages:
   human-signals@2.1.0:
     resolution: {integrity: sha512-B4FFZ6q/T2jhhksgkbEW3HBvWIfDW85snkQgawt07S7J5QXTk6BkNV+0yAeZrM5QpMAdYlocGoljn0sJ/WQkFw==}
     engines: {node: '>=10.17.0'}
+
+  humanize-duration-ts@2.1.1:
+    resolution: {integrity: sha512-TibNF2/fkypjAfHdGpWL/dmWUS0G6Qi+3mKyiB6LDCowbMy+PtzbgPTnFMNTOVAJXDau01jYrJ3tFoz5AJSqhA==}
 
   iconv-lite@0.4.24:
     resolution: {integrity: sha512-v3MXnZAcvnywkTUEZomIActle7RXXeedOR31wwl7VlyoXO4Qi9arvSenNQWne1TcRwhCL1HwLI21bEqdpj8/rA==}
@@ -9495,6 +9501,8 @@ snapshots:
       - supports-color
 
   human-signals@2.1.0: {}
+
+  humanize-duration-ts@2.1.1: {}
 
   iconv-lite@0.4.24:
     dependencies:
