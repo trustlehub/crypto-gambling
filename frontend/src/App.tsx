@@ -15,16 +15,8 @@ import {
 import api from './apis';
 import {AxiosInstance, AxiosResponse} from 'axios';
 import {Bookmaker, Market, OddsCleaned, Sport} from './types';
-import Calculator from './components/calculator';
+import Calculator, {ratingCalc} from './components/calculator';
 import FilterRules from "./filterRules";
-
-interface Data {
-    name: string;
-    calories: number;
-    fat: number;
-    carbs: number;
-    protein: number;
-}
 
 const BasicTable: React.FC = () => {
     const [data, setData] = useState<OddsCleaned[]>([])
@@ -103,7 +95,8 @@ const BasicTable: React.FC = () => {
                                                         home_team: sport.home_team,
                                                         away_team: sport.away_team,
                                                         odds_last_update: localisedOddsUpdate,
-                                                        lay_last_update: localisedLayUpdate
+                                                        lay_last_update: localisedLayUpdate,
+                                                        rating: ratingCalc(bookmaker_outcome.price,lay_outcome.price)
                                                     })
 
                                                 }
@@ -115,9 +108,9 @@ const BasicTable: React.FC = () => {
                         })
 
                     })
-
                 })
 
+                cleanedData.sort((a,b)=> parseFloat(b.rating) - parseFloat(a.rating))
                 setData(cleanedData)
             }
             apicall()
@@ -148,6 +141,7 @@ const BasicTable: React.FC = () => {
                             <TableCell align="right">Event</TableCell>
                             <TableCell align="right">Bet</TableCell>
                             <TableCell align="right">Bookmaker</TableCell>
+                            <TableCell align="right">Rating</TableCell>
                             <TableCell align="right">Odds</TableCell>
                             <TableCell align="right">Exchange</TableCell>
                             <TableCell align="right">Lay</TableCell>
@@ -170,6 +164,7 @@ const BasicTable: React.FC = () => {
                                 </TableCell>
                                 <TableCell align="right">{row.bet_team}</TableCell>
                                 <TableCell align="right">{row.bookmaker}</TableCell>
+                                <TableCell align="right">{row.rating + "%"}</TableCell>
                                 <Tooltip title={`Last updated: ${row.odds_last_update}`}>
                                     <TableCell align="right">{row.odds}</TableCell>
                                 </Tooltip>

@@ -13,28 +13,34 @@ const style = {
     p: 4,
 };
 
-const lay_stake_calc = (back_odds: number, lay_odds: number, back_stake: number, exchange_com: number) => {
+const layStakeCalc = (back_odds: number, lay_odds: number, back_stake: number, exchange_com: number) => {
     return (back_stake * back_odds) / (lay_odds - (lay_odds * exchange_com))
 
 }
-const liability_calc = (lay_stake: number, lay_odds: number) => {
+const liabilityCalc = (lay_stake: number, lay_odds: number) => {
     return lay_stake * (lay_odds - 1)
 }
 
-const profit_bookmaker_wins = (back_stake: number, back_odds: number, liability: number) => {
+const profitBookmakerWins = (back_stake: number, back_odds: number, liability: number) => {
     const bookmaker = back_stake * (back_odds - 1)
     const exchange = -1 * liability
     const profit = bookmaker + exchange
     return {bookmaker, exchange, profit}
 }
 
-const profit_exchange_wins = (back_stake: number, lay_stake: number, exchange_com:number) => {
+const profitExchangeWins = (back_stake: number, lay_stake: number, exchange_com: number) => {
     const bookmaker = -1 * back_stake
-    const exchange = lay_stake - (lay_stake * exchange_com/ 100)
+    const exchange = lay_stake - (lay_stake * exchange_com / 100)
     const profit = bookmaker + exchange
     return {bookmaker, exchange, profit}
 }
-const Calculator= ({back_odds, lay_odds}:{back_odds: number,  lay_odds: number}) => {
+
+const ratingCalc = (back_odds: number, lay_odds: number, exchange_com: number = 0, back_stake: number = 10) => {
+    const lay_stake = layStakeCalc(back_odds, lay_odds, back_stake, exchange_com)
+    const profit_from_exchange = profitExchangeWins(back_stake, lay_stake, exchange_com)
+    return ((back_stake + profit_from_exchange.profit) / back_stake * 100).toFixed(1)
+}
+const Calculator = ({back_odds, lay_odds}: { back_odds: number, lay_odds: number }) => {
     const [back_odds_input, setBack_odds_input] = useState(back_odds)
     const [lay_odds_input, setLay_odds_input] = useState(lay_odds)
     const [bookmaker_com, setBookmaker_com] = useState(0)
@@ -42,41 +48,41 @@ const Calculator= ({back_odds, lay_odds}:{back_odds: number,  lay_odds: number})
     const [back_stake, setBack_stake] = useState(10)
     const [back_win, setBack_win] = useState({
         bookmaker: 0,
-        exchange:0,
-        profit:0
+        exchange: 0,
+        profit: 0
     })
     const [lay_win, setLay_win] = useState({
         bookmaker: 0,
-        exchange:0,
-        profit:0
+        exchange: 0,
+        profit: 0
     })
     const [lay_stake, setLay_stake] = useState(0)
     const [liability, setLiability] = useState(0)
 
-    useEffect(() => {   
-        const lay = lay_stake_calc(
+    useEffect(() => {
+        const lay = layStakeCalc(
             back_odds_input,
             lay_odds_input,
             back_stake,
             exchange_com
         )
-        const liability = liability_calc(
-            lay, 
+        const liability = liabilityCalc(
+            lay,
             lay_odds_input
         )
         setLiability(liability)
         setLay_stake(lay)
-        setLay_win(profit_exchange_wins(
+        setLay_win(profitExchangeWins(
             back_stake,
             lay,
             exchange_com
-        ))    
-        setBack_win(profit_bookmaker_wins(back_stake, back_odds_input, liability))
-        
-    }, [back_odds_input,lay_odds_input, bookmaker_com, exchange_com, back_stake  ]);
+        ))
+        setBack_win(profitBookmakerWins(back_stake, back_odds_input, liability))
+
+    }, [back_odds_input, lay_odds_input, bookmaker_com, exchange_com, back_stake]);
     return <Box sx={{...style}}>
         <Box sx={{display: 'grid', gridAutoFlow: 'column',}}>
-            <Box sx={{minHeight: '80px', minWidth: '100px', }}>
+            <Box sx={{minHeight: '80px', minWidth: '100px',}}>
                 <Typography variant='h5'>
                     Bookmaker
                 </Typography>
@@ -101,9 +107,9 @@ const Calculator= ({back_odds, lay_odds}:{back_odds: number,  lay_odds: number})
                 <Typography variant='body1'>
                     Bet {back_stake.toFixed(2)} at odds of {back_odds_input}
                 </Typography>
-                
+
             </Box>
-            <Box sx={{minHeight: '80px', minWidth: '100px', }}>
+            <Box sx={{minHeight: '80px', minWidth: '100px',}}>
                 <Typography variant='h5'>
                     Exchange
                 </Typography>
@@ -120,7 +126,7 @@ const Calculator= ({back_odds, lay_odds}:{back_odds: number,  lay_odds: number})
                     onChange={event => setExchange_com(parseInt((event.target.value)))}
                 />
                 <Typography variant='body1'>
-                   Lay {lay_stake.toFixed(2)} at odds of {lay_odds_input} 
+                    Lay {lay_stake.toFixed(2)} at odds of {lay_odds_input}
                 </Typography>
                 <Typography variant='subtitle2'>
                     Liability: {liability.toFixed(2)}
@@ -157,3 +163,4 @@ const Calculator= ({back_odds, lay_odds}:{back_odds: number,  lay_odds: number})
 }
 
 export default Calculator
+export {ratingCalc}

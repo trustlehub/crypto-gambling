@@ -40,6 +40,7 @@ interface OddsCleaned {
     away_team: string;
     odds_last_update: string;
     lay_last_update: string;
+    rating: string;
 
 }
 
