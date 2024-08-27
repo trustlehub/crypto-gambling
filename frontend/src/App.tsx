@@ -29,14 +29,14 @@ const BasicTable: React.FC = () => {
     const humanizer: HumanizeDuration = new HumanizeDuration(langService);
     useEffect(() => {
         if (api) {
-
             const apicall = async () => {
                 const cleanedData: OddsCleaned[] = []
                 const response: AxiosResponse = await api.get(
                     '/sports/cricket/odds/',
                     {
                         params: {
-                            regions: "us,au,uk",
+                            regions: "us2,eu,us,au,uk",
+                            markets:'h2h'
                         }
                     }
                 )

@@ -90,19 +90,19 @@ const Calculator = ({back_odds, lay_odds}: { back_odds: number, lay_odds: number
                     label="Odds"
                     value={back_odds_input}
                     type={'number'}
-                    onChange={event => setBack_odds_input(parseInt((event.target.value)))}
+                    onChange={event => setBack_odds_input(parseFloat((event.target.value)))}
                 />
                 <TextField
                     label="Stake"
                     value={back_stake}
                     type={'number'}
-                    onChange={event => setBack_stake(parseInt((event.target.value)))}
+                    onChange={event => setBack_stake(parseFloat((event.target.value)))}
                 />
                 <TextField
                     label="Com %"
                     value={bookmaker_com}
                     type={'number'}
-                    onChange={event => setBookmaker_com(parseInt((event.target.value)))}
+                    onChange={event => setBookmaker_com(parseFloat((event.target.value)))}
                 />
                 <Typography variant='body1'>
                     Bet {back_stake.toFixed(2)} at odds of {back_odds_input}
@@ -117,13 +117,13 @@ const Calculator = ({back_odds, lay_odds}: { back_odds: number, lay_odds: number
                     label="Odds"
                     value={lay_odds_input}
                     type={'number'}
-                    onChange={event => setLay_odds_input(parseInt((event.target.value)))}
+                    onChange={event => setLay_odds_input(parseFloat((event.target.value)))}
                 />
                 <TextField
                     label="Com %"
                     value={exchange_com}
                     type={'number'}
-                    onChange={event => setExchange_com(parseInt((event.target.value)))}
+                    onChange={event => setExchange_com(parseFloat((event.target.value)))}
                 />
                 <Typography variant='body1'>
                     Lay {lay_stake.toFixed(2)} at odds of {lay_odds_input}
