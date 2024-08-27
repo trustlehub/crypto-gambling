@@ -33,10 +33,10 @@ const BasicTable: React.FC = () => {
             const apicall = async () => {
                 const cleanedData: OddsCleaned[] = []
                 const response: AxiosResponse = await api.get(
-                    '/sports/upcoming/odds/',
+                    '/sports/cricket/odds/',
                     {
                         params: {
-                            regions: 'au',
+                            regions: "us,au,uk",
                         }
                     }
                 )
