@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {Box, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography} from "@mui/material";
+import {layStakeCalc, liabilityCalc, profitBookmakerWins, profitExchangeWins} from "../utils/calc";
 
 const style = {
     position: 'absolute' as 'absolute',
@@ -13,33 +14,6 @@ const style = {
     p: 4,
 };
 
-const layStakeCalc = (back_odds: number, lay_odds: number, back_stake: number, exchange_com: number) => {
-    return (back_stake * back_odds) / (lay_odds - (lay_odds * exchange_com))
-
-}
-const liabilityCalc = (lay_stake: number, lay_odds: number) => {
-    return lay_stake * (lay_odds - 1)
-}
-
-const profitBookmakerWins = (back_stake: number, back_odds: number, liability: number) => {
-    const bookmaker = back_stake * (back_odds - 1)
-    const exchange = -1 * liability
-    const profit = bookmaker + exchange
-    return {bookmaker, exchange, profit}
-}
-
-const profitExchangeWins = (back_stake: number, lay_stake: number, exchange_com: number) => {
-    const bookmaker = -1 * back_stake
-    const exchange = lay_stake - (lay_stake * exchange_com / 100)
-    const profit = bookmaker + exchange
-    return {bookmaker, exchange, profit}
-}
-
-const ratingCalc = (back_odds: number, lay_odds: number, exchange_com: number = 0, back_stake: number = 10) => {
-    const lay_stake = layStakeCalc(back_odds, lay_odds, back_stake, exchange_com)
-    const profit_from_exchange = profitExchangeWins(back_stake, lay_stake, exchange_com)
-    return ((back_stake + profit_from_exchange.profit) / back_stake * 100).toFixed(1)
-}
 const Calculator = ({back_odds, lay_odds}: { back_odds: number, lay_odds: number }) => {
     const [back_odds_input, setBack_odds_input] = useState(back_odds)
     const [lay_odds_input, setLay_odds_input] = useState(lay_odds)
@@ -163,4 +137,3 @@ const Calculator = ({back_odds, lay_odds}: { back_odds: number, lay_odds: number
 }
 
 export default Calculator
-export {ratingCalc}

@@ -27,6 +27,7 @@ interface Outcome {
     price: number;
 }
 
+
 interface OddsCleaned {
     event: string;
     time: string;
@@ -47,5 +48,27 @@ interface OddsCleaned {
 interface SportExtended extends Sport {
 
 }
+// sanitizer types
+type OutcomeData = {
+    price: number;
+    maxStake: number;
+    minStake: number;
+};
 
-export type {Sport, OddsCleaned, SportExtended, Bookmaker, Market, Outcome}
+type EventOdds = {
+    name: string;
+    home_team: string;
+    away_team: string;
+    time: string; // You can use Date if it's a Date object
+    polymarket: {
+        [outcome: string]: OutcomeData;
+    };
+    cloudbet: {
+        [outcome: string]: OutcomeData;
+    };
+};
+
+type FilteredOdds = {
+    [key: string]: EventOdds;
+};
+export type {Sport, OddsCleaned, SportExtended, Bookmaker, Market, Outcome, FilteredOdds}

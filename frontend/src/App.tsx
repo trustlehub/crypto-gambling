@@ -12,11 +12,11 @@ import {
     Modal,
     Box, Typography, Tooltip
 } from '@mui/material';
-import api from './apis';
-import {AxiosInstance, AxiosResponse} from 'axios';
-import {Bookmaker, Market, OddsCleaned, Sport} from './types';
-import Calculator, {ratingCalc} from './components/calculator';
-import FilterRules from "./filterRules";
+import {OddsCleaned} from './types';
+import Calculator from './components/calculator';
+import {CloudbetApiData, PolymarketApiData} from "./services/OddsApiService";
+import {CleanedPolymarketOdds} from "./types/Polymarket";
+import {SanitizeOdds_Cloudbet_Polymarket} from "./sanitizers/OddsSanitizer";
 
 const BasicTable: React.FC = () => {
     const [data, setData] = useState<OddsCleaned[]>([])
@@ -28,95 +28,41 @@ const BasicTable: React.FC = () => {
     const langService: HumanizeDurationLanguage = new HumanizeDurationLanguage();
     const humanizer: HumanizeDuration = new HumanizeDuration(langService);
     useEffect(() => {
-        if (api) {
-            const apicall = async () => {
-                const cleanedData: OddsCleaned[] = []
-                const response: AxiosResponse = await api.get(
-                    '/sports/cricket/odds/',
-                    {
-                        params: {
-                            regions: "us2,eu,us,au,uk",
-                            markets:'h2h'
-                        }
-                    }
-                )
-                const data: Sport[] = response.data
-                const sports_with_lay: Sport[] = data.filter((sport) => {
-                    return sport.bookmakers.find((bookmaker) => {
-                        return FilterRules.includes(bookmaker.key) && bookmaker.markets.find((market) => market.key == 'h2h_lay')
-                    })
-                })
-                sports_with_lay.forEach((sport) => {
-                    let exchanges: Bookmaker[] = sport.bookmakers.filter(bookmaker => {
-                        return bookmaker.markets.find((market) => market.key == 'h2h_lay')
-                    })
+        const repeatTillOddsListFull = async () => {
+            let oddsList: CleanedPolymarketOdds[] = []
+            const requests = [];
 
-                    exchanges.forEach(exchange => {
-                        // undefined is only for type checking. It won't be undefined as we filtered out all sports
-                        // which dont have lay markets
-                        let lay_market: Market | undefined = exchange.markets.find((m) => m.key == 'h2h_lay')
-                        lay_market?.outcomes.forEach((lay_outcome) => {
-                            sport.bookmakers.forEach((bookmaker) => {
-                                if (FilterRules.includes(bookmaker.key)) {
-                                    bookmaker.markets.forEach((market) => {
-                                        if (market.key == 'h2h') {
-                                            market.outcomes.forEach(bookmaker_outcome => {
-                                                if (bookmaker_outcome.name == lay_outcome.name) {
-                                                    let localizedDate = new Date(sport.commence_time).toLocaleString(undefined, {
-                                                        // year: 'numeric',
-                                                        month: 'short',
-                                                        day: 'numeric',
-                                                        hour: 'numeric',
-                                                        minute: 'numeric',
-                                                    });
-                                                    let localisedLayUpdate = new Date(exchange.last_update).toLocaleString(undefined, {
-                                                        // year: 'numeric',
-                                                        month: 'short',
-                                                        day: 'numeric',
-                                                        hour: 'numeric',
-                                                        minute: 'numeric',
-                                                    });
-                                                    let localisedOddsUpdate = new Date(market.last_update).toLocaleString(undefined, {
-                                                        // year: 'numeric',
-                                                        month: 'short',
-                                                        day: 'numeric',
-                                                        hour: 'numeric',
-                                                        minute: 'numeric',
-                                                    });
-                                                    cleanedData.push({
-                                                        time: localizedDate,
-                                                        event: sport.sport_title,
-                                                        bookmaker: bookmaker.title,
-                                                        bet_team: bookmaker_outcome.name,
-                                                        odds: bookmaker_outcome.price,
-                                                        lay: lay_outcome.price,
-                                                        avail: 10,
-                                                        exchange: exchange.title,
-                                                        home_team: sport.home_team,
-                                                        away_team: sport.away_team,
-                                                        odds_last_update: localisedOddsUpdate,
-                                                        lay_last_update: localisedLayUpdate,
-                                                        rating: ratingCalc(bookmaker_outcome.price,lay_outcome.price)
-                                                    })
-
-                                                }
-                                            })
-                                        }
-                                    })
-                                }
-                            })
-                        })
-
-                    })
-                })
-
-                cleanedData.sort((a,b)=> parseFloat(b.rating) - parseFloat(a.rating))
-                setData(cleanedData)
+            for (let i = 0; i < 60; i++) {
+                // Collect promises for network requests
+                requests.push(PolymarketApiData(i));
             }
-            apicall()
 
+            try {
+                // Resolve all network requests in parallel
+                const results = await Promise.all(requests);
+
+                // Flatten the result and concatenate with the current oddsList
+                const allData = results.flat(); // Assuming each API call returns an array of odds
+                oddsList = oddsList.concat(allData);
+
+                // Filter out duplicates based on 'id'
+                oddsList = oddsList.filter((item, index, self) =>
+                    index === self.findIndex((obj) => obj.id === item.id)
+                );
+
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+
+            return oddsList;
         }
 
+        const getOdds = async () => {
+            const responses = await Promise.all([repeatTillOddsListFull(), CloudbetApiData()])
+            const odds = SanitizeOdds_Cloudbet_Polymarket(responses[0], responses[1])
+            setData(odds)
+        }
+        getOdds()
     }, [])
     useEffect(() => {
         const timer = setInterval(() => {
