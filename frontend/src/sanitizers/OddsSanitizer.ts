@@ -56,6 +56,10 @@ export const SanitizeOdds_Cloudbet_Polymarket = (polymarketOdds: CleanedPolymark
                                         price: 0,
                                         maxStake: 0,
                                         minStake: 0,
+                                        cloudbetParams: "",
+                                        cloudbetMarketKey: "",
+                                        eventId: "",
+                                        teamData: {}
                                     }
                                 },
                             }
@@ -78,15 +82,19 @@ export const SanitizeOdds_Cloudbet_Polymarket = (polymarketOdds: CleanedPolymark
                                         price: 0,
                                         maxStake: 0,
                                         minStake: 0,
+                                        cloudbetParams: "",
+                                        cloudbetMarketKey: "",
+                                        eventId: "",
+                                        teamData: {}
                                     }
                                 },
                             }
                         }
                     })
 
-                    for (let market in event.markets) {
-                        if (market.includes("moneyline")) {  // only interested in moneyline markets for now
-                            const selectedMarket = event.markets[market]
+                    for (let marketsKey in event.markets) {
+                        if (marketsKey.includes("moneyline")) {  // only interested in moneyline markets for now
+                            const selectedMarket = event.markets[marketsKey]
                             for (const selection of selectedMarket.submarkets[Object.keys(selectedMarket.submarkets)[0]].selections) {
                                 // @ts-ignore
                                 const team_key = event[selection.outcome].key
@@ -96,7 +104,11 @@ export const SanitizeOdds_Cloudbet_Polymarket = (polymarketOdds: CleanedPolymark
                                             filteredOdds[eventKey].cloudbet[teamName].price = selection.price
                                             filteredOdds[eventKey].cloudbet[teamName].maxStake = selection.maxStake
                                             filteredOdds[eventKey].cloudbet[teamName].minStake = selection.minStake
-
+                                            filteredOdds[eventKey].cloudbet[teamName].cloudbetParams = selection.params
+                                            filteredOdds[eventKey].cloudbet[teamName].cloudbetMarketKey = marketsKey
+                                            filteredOdds[eventKey].cloudbet[teamName].eventId = event.id.toString()
+                                            filteredOdds[eventKey].cloudbet[teamName].teamData.home = event.home
+                                            filteredOdds[eventKey].cloudbet[teamName].teamData.away = event.away
                                         }
                                     }
                                 }
@@ -112,7 +124,6 @@ export const SanitizeOdds_Cloudbet_Polymarket = (polymarketOdds: CleanedPolymark
     }
     console.log(cloudbetCompetitions)
     console.log(polymarketOdds)
-    console.log(filteredOdds)
     console.log(filteredOdds)
 
     for (const odd in filteredOdds) {
@@ -139,6 +150,13 @@ export const SanitizeOdds_Cloudbet_Polymarket = (polymarketOdds: CleanedPolymark
             odds_last_update: new Date().toISOString(),
             lay_last_update: new Date().toISOString(),
             rating: rating,
+            meta: {
+                cloudbetParams: filteredOdds[odd].cloudbet[Object.keys(bet_team)[0]].cloudbetParams,
+                cloudbetMarketKey: filteredOdds[odd].cloudbet[Object.keys(bet_team)[0]].cloudbetMarketKey,
+                cloudbetEventId: filteredOdds[odd].cloudbet[Object.keys(bet_team)[0]].eventId,
+                teamData: filteredOdds[odd].cloudbet[Object.keys(bet_team)[0]].teamData,
+                outcomes: Object.keys(bet_team)
+            }
         })
 
         // cloudbet lay, poly back, backing B
@@ -164,6 +182,13 @@ export const SanitizeOdds_Cloudbet_Polymarket = (polymarketOdds: CleanedPolymark
             odds_last_update: new Date().toISOString(),
             lay_last_update: new Date().toISOString(),
             rating: rating,
+            meta: {
+                cloudbetParams: filteredOdds[odd].cloudbet[Object.keys(bet_team)[1]].cloudbetParams,
+                cloudbetMarketKey: filteredOdds[odd].cloudbet[Object.keys(bet_team)[1]].cloudbetMarketKey,
+                cloudbetEventId: filteredOdds[odd].cloudbet[Object.keys(bet_team)[1]].eventId,
+                teamData: filteredOdds[odd].cloudbet[Object.keys(bet_team)[1]].teamData,
+                outcomes: Object.keys(bet_team)
+            }
         })
         // cloudbet back, poly lay, backing A
         bet_team = filteredOdds[odd].cloudbet
@@ -188,6 +213,13 @@ export const SanitizeOdds_Cloudbet_Polymarket = (polymarketOdds: CleanedPolymark
             odds_last_update: new Date().toISOString(),
             lay_last_update: new Date().toISOString(),
             rating: rating,
+            meta: {
+                cloudbetParams: filteredOdds[odd].cloudbet[Object.keys(bet_team)[0]].cloudbetParams,
+                cloudbetMarketKey: filteredOdds[odd].cloudbet[Object.keys(bet_team)[0]].cloudbetMarketKey,
+                cloudbetEventId: filteredOdds[odd].cloudbet[Object.keys(bet_team)[0]].eventId,
+                teamData: filteredOdds[odd].cloudbet[Object.keys(bet_team)[0]].teamData,
+                outcomes: Object.keys(bet_team)
+            }
         })
         // cloudbet back, poly lay, backing B
         bet_team = filteredOdds[odd].cloudbet
@@ -212,6 +244,13 @@ export const SanitizeOdds_Cloudbet_Polymarket = (polymarketOdds: CleanedPolymark
             odds_last_update: new Date().toISOString(),
             lay_last_update: new Date().toISOString(),
             rating: rating,
+            meta: {
+                cloudbetParams: filteredOdds[odd].cloudbet[Object.keys(bet_team)[1]].cloudbetParams,
+                cloudbetMarketKey: filteredOdds[odd].cloudbet[Object.keys(bet_team)[1]].cloudbetMarketKey,
+                cloudbetEventId: filteredOdds[odd].cloudbet[Object.keys(bet_team)[1]].eventId,
+                teamData: filteredOdds[odd].cloudbet[Object.keys(bet_team)[1]].teamData,
+                outcomes: Object.keys(bet_team)
+            }
         })
     }
 

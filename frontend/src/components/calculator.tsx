@@ -1,6 +1,7 @@
-import React, {useEffect, useState} from "react";
-import {Box, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography} from "@mui/material";
+import React, {useContext, useEffect, useState} from "react";
+import {Box, Button, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography} from "@mui/material";
 import {layStakeCalc, liabilityCalc, profitBookmakerWins, profitExchangeWins} from "../utils/calc";
+import {useBetting} from "../services/BettingProvider";
 
 const style = {
     position: 'absolute' as 'absolute',
@@ -14,9 +15,11 @@ const style = {
     p: 4,
 };
 
-const Calculator = ({back_odds, lay_odds}: { back_odds: number, lay_odds: number }) => {
-    const [back_odds_input, setBack_odds_input] = useState(back_odds)
-    const [lay_odds_input, setLay_odds_input] = useState(lay_odds)
+const Calculator = () => {
+    const bettingProvider = useBetting()
+    const {selectedData,bettingService} = bettingProvider
+    const [back_odds_input, setBack_odds_input] = useState(selectedData?.odds || 0)
+    const [lay_odds_input, setLay_odds_input] = useState(selectedData?.lay || 0)
     const [bookmaker_com, setBookmaker_com] = useState(0)
     const [exchange_com, setExchange_com] = useState(0)
     const [back_stake, setBack_stake] = useState(10)
@@ -32,6 +35,7 @@ const Calculator = ({back_odds, lay_odds}: { back_odds: number, lay_odds: number
     })
     const [lay_stake, setLay_stake] = useState(0)
     const [liability, setLiability] = useState(0)
+
 
     useEffect(() => {
         const lay = layStakeCalc(
@@ -60,6 +64,9 @@ const Calculator = ({back_odds, lay_odds}: { back_odds: number, lay_odds: number
                 <Typography variant='h5'>
                     Bookmaker
                 </Typography>
+                <Typography>
+                    {selectedData?.bookmaker}
+                </Typography>
                 <TextField
                     label="Odds"
                     value={back_odds_input}
@@ -81,11 +88,24 @@ const Calculator = ({back_odds, lay_odds}: { back_odds: number, lay_odds: number
                 <Typography variant='body1'>
                     Bet {back_stake.toFixed(2)} at odds of {back_odds_input}
                 </Typography>
+                <Button
+                    onClick={() => {
+
+                        if (selectedData?.exchange == "Polymarket") {
+
+                        }
+                    }}
+                >
+                    Place bets
+                </Button>
 
             </Box>
             <Box sx={{minHeight: '80px', minWidth: '100px',}}>
                 <Typography variant='h5'>
                     Exchange
+                </Typography>
+                <Typography>
+                    {selectedData?.exchange}
                 </Typography>
                 <TextField
                     label="Odds"
@@ -105,6 +125,27 @@ const Calculator = ({back_odds, lay_odds}: { back_odds: number, lay_odds: number
                 <Typography variant='subtitle2'>
                     Liability: {liability.toFixed(2)}
                 </Typography>
+
+                <Button onClick={() => {
+                    if (selectedData?.exchange === "Cloudbet") {
+                        if (selectedData && selectedData.meta?.cloudbetEventId ) {
+                            for (const outcome in selectedData.meta.teamData) {
+                               if (!selectedData.bet_team.includes(selectedData.meta.teamData[outcome].name)) { // i.e: not the backing team
+                                   bettingService.placeCloudbetBet(
+                                       selectedData.meta.cloudbetEventId ,
+                                       `${selectedData.meta.cloudbetMarketKey}/${outcome}`,
+                                       selectedData.lay.toString(),
+                                       lay_stake.toString(),
+                                   )
+                                   break;
+                               }
+                            }
+                        }
+                            
+                    }
+                }}>
+                    Place bets
+                </Button>
             </Box>
         </Box>
         <Box>

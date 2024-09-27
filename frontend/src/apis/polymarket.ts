@@ -35,5 +35,6 @@ const createPolymarketApiInstance = () => {
     );
     return axiosInstance
 }
+
 const polymarketapi = createPolymarketApiInstance()
 export {polymarketapi};

@@ -12,56 +12,18 @@ import {
     Modal,
     Box, Typography, Tooltip
 } from '@mui/material';
-import {OddsCleaned} from './types';
 import Calculator from './components/calculator';
-import {CloudbetApiData, PolymarketApiData} from "./services/OddsApiService";
-import {CleanedPolymarketOdds} from "./types/Polymarket";
-import {SanitizeOdds_Cloudbet_Polymarket} from "./sanitizers/OddsSanitizer";
+import {useBetting} from "./services/BettingProvider";
 
 const BasicTable: React.FC = () => {
-    const [data, setData] = useState<OddsCleaned[]>([])
     const [modalOpen, setmodalOpen] = useState(false)
-    const [backOdds, setBackOdds] = useState<number>(0)
-    const [layOdds, setLayOdds] = useState<number>(0)
     const [timeSinceLastRefresh, setTimeSinceLastRefresh] = useState<number>(0)
     const [timer, setTimer] = useState<NodeJS.Timer>()
     const langService: HumanizeDurationLanguage = new HumanizeDurationLanguage();
     const humanizer: HumanizeDuration = new HumanizeDuration(langService);
+    const bettingProvider = useBetting()
+    const {getOdds, setSelectedData, data} = bettingProvider
     useEffect(() => {
-        const repeatTillOddsListFull = async () => {
-            let oddsList: CleanedPolymarketOdds[] = []
-            const requests = [];
-
-            for (let i = 0; i < 60; i++) {
-                // Collect promises for network requests
-                requests.push(PolymarketApiData(i));
-            }
-
-            try {
-                // Resolve all network requests in parallel
-                const results = await Promise.all(requests);
-
-                // Flatten the result and concatenate with the current oddsList
-                const allData = results.flat(); // Assuming each API call returns an array of odds
-                oddsList = oddsList.concat(allData);
-
-                // Filter out duplicates based on 'id'
-                oddsList = oddsList.filter((item, index, self) =>
-                    index === self.findIndex((obj) => obj.id === item.id)
-                );
-
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-
-            return oddsList;
-        }
-
-        const getOdds = async () => {
-            const responses = await Promise.all([repeatTillOddsListFull(), CloudbetApiData()])
-            const odds = SanitizeOdds_Cloudbet_Polymarket(responses[0], responses[1])
-            setData(odds)
-        }
         getOdds()
     }, [])
     useEffect(() => {
@@ -119,8 +81,7 @@ const BasicTable: React.FC = () => {
                                     <TableCell align="right">{row.lay}</TableCell>
                                 </Tooltip>
                                 <TableCell align="right"><Button onClick={() => {
-                                    setBackOdds(row.odds)
-                                    setLayOdds(row.lay)
+                                    setSelectedData(row)
                                     setmodalOpen(true)
                                 }}>Calc</Button></TableCell>
                             </TableRow>
@@ -133,10 +94,7 @@ const BasicTable: React.FC = () => {
                 onClose={() => setmodalOpen(false)}
             >
                 <Box>
-                    <Calculator
-                        back_odds={backOdds}
-                        lay_odds={layOdds}
-                    />
+                    <Calculator/>
                 </Box>
 
             </Modal>

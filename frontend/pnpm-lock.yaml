@@ -62,9 +62,16 @@ importers:
       typescript:
         specifier: ^4.9.5
         version: 4.9.5
+      uuid:
+        specifier: ^10.0.0
+        version: 10.0.0
       web-vitals:
         specifier: ^2.1.4
         version: 2.1.4
+    devDependencies:
+      '@types/uuid':
+        specifier: ^10.0.0
+        version: 10.0.0
 
 packages:
 
@@ -1487,6 +1494,9 @@ packages:
 
   '@types/trusted-types@2.0.7':
     resolution: {integrity: sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==}
+
+  '@types/uuid@10.0.0':
+    resolution: {integrity: sha512-7gqG38EyHgyP1S+7+xomFtL+ZNHcKv6DwNaCZmJmo1vgMugyF3TCnXVg4t1uk89mLNwnLtnY3TpOpCOyp1/xHQ==}
 
   '@types/ws@8.5.12':
     resolution: {integrity: sha512-3tPRkv1EtkDpzlgyKyI8pGsGZAGPEaXeu0DOj5DI25Ja91bdAYddYHbADRYVrZMRbfW+1l5YwXVDKohDJNQxkQ==}
@@ -5416,6 +5426,10 @@ packages:
     resolution: {integrity: sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA==}
     engines: {node: '>= 0.4.0'}
 
+  uuid@10.0.0:
+    resolution: {integrity: sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==}
+    hasBin: true
+
   uuid@8.3.2:
     resolution: {integrity: sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==}
     hasBin: true
@@ -7506,6 +7520,8 @@ snapshots:
       '@types/jest': 27.5.2
 
   '@types/trusted-types@2.0.7': {}
+
+  '@types/uuid@10.0.0': {}
 
   '@types/ws@8.5.12':
     dependencies:
@@ -12154,6 +12170,8 @@ snapshots:
   utila@0.4.0: {}
 
   utils-merge@1.0.1: {}
+
+  uuid@10.0.0: {}
 
   uuid@8.3.2: {}
 

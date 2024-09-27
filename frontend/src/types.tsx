@@ -42,18 +42,31 @@ interface OddsCleaned {
     odds_last_update: string;
     lay_last_update: string;
     rating: string;
-
+    meta?: {
+        cloudbetMarketKey?: string;
+        cloudbetParams?: string;
+        cloudbetEventId?: string;
+        [key: string]: any; 
+    };
 }
 
 interface SportExtended extends Sport {
 
 }
+
 // sanitizer types
-type OutcomeData = {
+interface OutcomeData {
     price: number;
     maxStake: number;
     minStake: number;
+    [key: string]: any;
 };
+
+interface CloudbetOutcomeData extends OutcomeData {
+    cloudbetParams: string
+    cloudbetMarketKey: string
+    eventId: string
+}
 
 type EventOdds = {
     name: string;
@@ -64,7 +77,7 @@ type EventOdds = {
         [outcome: string]: OutcomeData;
     };
     cloudbet: {
-        [outcome: string]: OutcomeData;
+        [outcome: string]: CloudbetOutcomeData;
     };
 };
 

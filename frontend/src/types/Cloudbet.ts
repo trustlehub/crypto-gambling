@@ -31,6 +31,7 @@ export type CloudbetEvent = {
     status: string
     cutoffTime: string
     key: string
+    id: number
 }
 export type CloudbetCompetition = {
     category: {
