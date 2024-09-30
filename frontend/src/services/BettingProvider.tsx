@@ -101,7 +101,8 @@ export const BettingProvider = ({children}: { children: React.ReactNode }) => {
 
     const getOdds = async () => {
         const responses = await Promise.all([repeatTillOddsListFull(), CloudbetApiData()])
-        const balanceResponse = await fetch("http://localhost:8000/balance")
+        const url = process.env.REACT_APP_POLYMARKET_BET_BASEURL || 'http://localhost:8000';
+        const balanceResponse = await fetch(`${url}/balance`)
         const data = await balanceResponse.json()
         const odds = SanitizeOdds_Cloudbet_Polymarket(responses[0], responses[1], data['balance'])
         setData(odds)
