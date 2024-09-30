@@ -1,6 +1,6 @@
 import React, {createContext, useContext, useEffect, useRef, useState} from 'react';
 import {OddsCleaned} from "../types";
-import {CleanedPolymarketOdds} from "../types/Polymarket";
+import {CleanedPolymarketOdds, PolymarketOdds} from "../types/Polymarket";
 import {CloudbetApiData, PolymarketApiData} from "./OddsApiService";
 import {SanitizeOdds_Cloudbet_Polymarket} from "../sanitizers/OddsSanitizer";
 import {BettingContextProps} from "../types/BettingContextProps";
@@ -71,7 +71,7 @@ export const BettingProvider = ({children}: { children: React.ReactNode }) => {
     const [selectedData, setSelectedData] = useState<OddsCleaned | null>(null)
     const bettingService = useRef<BettingService>(defaultContextValues.bettingService)
     const repeatTillOddsListFull = async () => {
-        let oddsList: CleanedPolymarketOdds[] = []
+        let oddsList: PolymarketOdds[] = []
         const requests = [];
 
         for (let i = 0; i < 60; i++) {
@@ -101,7 +101,9 @@ export const BettingProvider = ({children}: { children: React.ReactNode }) => {
 
     const getOdds = async () => {
         const responses = await Promise.all([repeatTillOddsListFull(), CloudbetApiData()])
-        const odds = SanitizeOdds_Cloudbet_Polymarket(responses[0], responses[1])
+        const balanceResponse = await fetch("http://localhost:8000/balance")
+        const data = await balanceResponse.json()
+        const odds = SanitizeOdds_Cloudbet_Polymarket(responses[0], responses[1], data['balance'])
         setData(odds)
     }
     return (

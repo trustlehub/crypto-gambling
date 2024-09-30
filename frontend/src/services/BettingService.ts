@@ -1,7 +1,8 @@
 // Import required modules for HTTP requests
-import axios, {AxiosInstance, AxiosResponse} from 'axios';
+import axios, {Axios, AxiosError, AxiosInstance, AxiosResponse} from 'axios';
 import {v4 as uuidv4} from 'uuid';
 import {cloudbetapi} from "../apis/cloudbet";
+import {CloudbetEvent} from "../types/Cloudbet";
 
 // Cloudbet and Polymarket API URLs
 const CLOUD_BET_BASE_URL = 'https://api.cloudbet.com';
@@ -14,57 +15,86 @@ interface BetResponse {
 
 export class BettingService {
     private cloudbetApi: AxiosInstance;
-    // private polymarketApi: AxiosInstance;
+    private polymarketBetApi: AxiosInstance
 
     constructor() {
         this.cloudbetApi = cloudbetapi;
+        this.polymarketBetApi = axios.create({
+            baseURL: process.env.REACT_APP_POLYMARKET_BET_BASEURL || 'http://localhost:8000',
+        })
         // this.polymarketApi = polymarketApi;
     }
 
+
     // Place a bet on Cloudbet
-    async placeCloudbetBet(eventId: string, marketUrl: string, price: string, stake: string, currency: string = "PLAY_EUR"): Promise<AxiosResponse> {
+    async placeCloudbetBet(eventId: string, marketUrl: string, price: string, stake: string, outcome: string, currency: string = "PLAY_EUR"): Promise<AxiosResponse> {
+        currency = process.env.REACT_APP_DEV === "true" ? "PLAY_EUR" : 'USDC'
         const referenceId = uuidv4()
-        const response = await cloudbetapi.post(
-            "/v3/bets/place",
-            {
-                currency,
-                eventId,
-                marketUrl,
-                price,
-                stake,
-                referenceId
-            },
-        );
-        return response
+        const cResponse = await cloudbetapi.get(
+            `/v2/odds/events/${eventId}`
+        )
+        const data: CloudbetEvent = cResponse.data;
+        for (let marketsKey in data.markets) {
+            if (marketsKey.includes("moneyline")) {  // only interested in moneyline markets for now
+                const selectedMarket = data.markets[marketsKey]
+                for (const selection of selectedMarket.submarkets[Object.keys(selectedMarket.submarkets)[0]].selections) {
+                    // @ts-ignore
+                    if (selection.outcome === outcome) {
+                        if (parseFloat(price) !== selection.price) {
+                            console.log("got error")
+                            return Promise.reject(
+                                new AxiosError(
+                                    `Bet laid for ${price} but latest price is ${selection.price}. Try refreshing the page`
+                                )
+                            )
+
+                        }
+                    }
+                }
+            }
+        }
+
+        try {
+            const response = await cloudbetapi.post(
+                "/v3/bets/place",
+                {
+                    currency,
+                    eventId,
+                    marketUrl,
+                    price,
+                    stake,
+                    referenceId
+                },
+            );
+            return response
+        } catch (e) {
+            return Promise.reject(e);
+        }
     }
 
     // Place a bet on Polymarket
-    // async placePolymarketBet(marketId: string, outcome: string, stake: number): Promise<BetResponse> {
-    //     try {
-    //         const response = await axios.post(
-    //             `${POLY_MARKET_BASE_URL}/v1/bets`,
-    //             {
-    //                 marketId,
-    //                 outcome,
-    //                 stake,
-    //             },
-    //             {
-    //                 headers: {
-    //                     'Authorization': `Bearer ${this.polymarketApiKey}`,
-    //                     'Content-Type': 'application/json',
-    //                 },
-    //             }
-    //         );
-    //         return {
-    //             success: true,
-    //             message: 'Bet placed successfully on Polymarket',
-    //             data: response.data,
-    //         };
-    //     } catch (error) {
-    //         return {
-    //             success: false,
-    //             message: `Polymarket error: ${error.message}`,
-    //         };
-    //     }
-    // }
+    placePolymarketBet(tokenId: string, price: number, size: number, conditionId: string, outcome_price: number, side: string = "buy", test = true) {
+        test = process.env.REACT_APP_DEV === "true"
+        if (test) {
+            const response = this.polymarketBetApi.post("/test/trade", {
+                price: price,
+                size: size,
+                side: side,
+                token_id: tokenId,
+                condition_id: conditionId,
+                outcome_price: outcome_price
+            })
+            return response
+        }
+
+        const response = this.polymarketBetApi.post("/trade", {
+            price: price,
+            size: size,
+            side: side,
+            token_id: tokenId,
+            condition_id: conditionId,
+            outcome_price: outcome_price
+        })
+        return response
+    }
 }

@@ -70,6 +70,7 @@ export const OddsApiData = async () => {
                                             odds: bookmaker_outcome.price,
                                             lay: lay_outcome.price,
                                             avail: 10,
+                                            maxLay: "10",
                                             exchange: exchange.title,
                                             home_team: sport.home_team,
                                             away_team: sport.away_team,
@@ -98,17 +99,12 @@ export const PolymarketApiData = async (page: number) => {
         `/markets?tag_id=1&closed=false&limit=100&related_tags=true&offset=${page}`
     )
     const data: PolymarketOdds[] = response.data
-    // @ts-ignore
-    const filtered: CleanedPolymarketOdds[] = data.filter(market => {
-        market.outcomes = JSON.parse(market.outcomes)
-        return !market.outcomes.includes("Yes") && !market.outcomes.includes("No")
-    })
-    return filtered
+    return data
 }
 
 export const CloudbetApiData = async () => {
     const competitions= await cloudbetapi.get(
-        `/v2/odds/sports/american_football`
+        `/v2/odds/sports/basketball`
     )
     const competitionsData: CloudbetCompetitionsResponse = competitions.data;
     const finalData: CloudbetCompetition[] = [];

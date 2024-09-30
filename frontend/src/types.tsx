@@ -42,6 +42,7 @@ interface OddsCleaned {
     odds_last_update: string;
     lay_last_update: string;
     rating: string;
+    maxLay: string;
     meta?: {
         cloudbetMarketKey?: string;
         cloudbetParams?: string;
@@ -55,7 +56,7 @@ interface SportExtended extends Sport {
 }
 
 // sanitizer types
-interface OutcomeData {
+export interface OutcomeData {
     price: number;
     maxStake: number;
     minStake: number;
@@ -68,13 +69,22 @@ interface CloudbetOutcomeData extends OutcomeData {
     eventId: string
 }
 
+interface PolymarketOutcomeData extends  OutcomeData {
+    clobTokenIds: string[];
+    orderMinSize: number;
+    bestAsk: number;
+    volume: string;
+    
+    
+}
+
 type EventOdds = {
     name: string;
     home_team: string;
     away_team: string;
     time: string; // You can use Date if it's a Date object
     polymarket: {
-        [outcome: string]: OutcomeData;
+        [outcome: string]: PolymarketOutcomeData;
     };
     cloudbet: {
         [outcome: string]: CloudbetOutcomeData;

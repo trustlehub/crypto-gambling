@@ -53,6 +53,7 @@ const BasicTable: React.FC = () => {
                             <TableCell align="right">Odds</TableCell>
                             <TableCell align="right">Exchange</TableCell>
                             <TableCell align="right">Lay</TableCell>
+                            <TableCell align="right">Avail</TableCell>
                             <TableCell align="right">Calc</TableCell>
                         </TableRow>
                     </TableHead>
@@ -80,6 +81,7 @@ const BasicTable: React.FC = () => {
                                 <Tooltip title={`Last updated: ${row.lay_last_update}`}>
                                     <TableCell align="right">{row.lay}</TableCell>
                                 </Tooltip>
+                                <TableCell align="right">{row.maxLay}</TableCell>
                                 <TableCell align="right"><Button onClick={() => {
                                     setSelectedData(row)
                                     setmodalOpen(true)
