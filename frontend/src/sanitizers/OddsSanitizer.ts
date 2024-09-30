@@ -36,6 +36,7 @@ export const SanitizeOdds_Cloudbet_Polymarket = (polymarketOdds: PolymarketOdds[
                 for (const outcome of pOdds.outcomes) { // if bot teams names in the outcomes are included in the event key of cloudbet, event is matched
                     if (event.key.includes(outcome.toLowerCase())) { // team name is in event key?
                         console.log("teams match", outcome.toLowerCase(), event.key)
+                        eventMatched = true
                         if (new Date(event.cutoffTime).getTime() === new Date(pOdds.gameStartTime).getTime()) { // game start times match up?
                             eventMatched = true
                             console.log(outcome.toLowerCase(), event.key)
@@ -55,7 +56,7 @@ export const SanitizeOdds_Cloudbet_Polymarket = (polymarketOdds: PolymarketOdds[
                         if (filteredOdds[event.key]?.polymarket && filteredOdds[event.key]?.cloudbet) {
 
                             filteredOdds[event.key] = {
-                                name: event.name,
+                                name: cComp.name,
                                 time: event.cutoffTime,
                                 home_team: event.home.name,
                                 away_team: event.away.name,
@@ -88,7 +89,7 @@ export const SanitizeOdds_Cloudbet_Polymarket = (polymarketOdds: PolymarketOdds[
                         } else {
 
                             filteredOdds[event.key] = {
-                                name: event.name,
+                                name: cComp.name,
                                 time: event.cutoffTime,
                                 home_team: event.home.name,
                                 away_team: event.away.name,
@@ -258,7 +259,8 @@ export const SanitizeOdds_Cloudbet_Polymarket = (polymarketOdds: PolymarketOdds[
             odds_last_update: new Date().toISOString(),
             lay_last_update: new Date().toISOString(),
             rating: rating,
-            maxLay: (balance / 1e6).toFixed(2) + " USD",
+            maxLay: parseFloat(filteredOdds[odd].polymarket[lay_team_name].volume).toFixed(2) + " USD",
+            // maxLay: (balance / 1e6).toFixed(2) + " USD",
             meta: {
                 cloudbetParams: filteredOdds[odd].cloudbet[bet_team_name].cloudbetParams,
                 cloudbetMarketKey: filteredOdds[odd].cloudbet[bet_team_name].cloudbetMarketKey,
@@ -297,7 +299,7 @@ export const SanitizeOdds_Cloudbet_Polymarket = (polymarketOdds: PolymarketOdds[
             odds_last_update: new Date().toISOString(),
             lay_last_update: new Date().toISOString(),
             rating: rating,
-            maxLay: (balance / 1e6).toFixed(2) + " USD",
+            maxLay: parseFloat(filteredOdds[odd].polymarket[lay_team_name].volume).toFixed(2) + " USD",
             meta: {
                 cloudbetParams: filteredOdds[odd].cloudbet[bet_team_name].cloudbetParams,
                 cloudbetMarketKey: filteredOdds[odd].cloudbet[bet_team_name].cloudbetMarketKey,

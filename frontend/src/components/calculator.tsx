@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useState} from "react";
 import {Box, Button, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography} from "@mui/material";
-import {layStakeCalc, liabilityCalc, profitBookmakerWins, profitExchangeWins} from "../utils/calc";
+import {layStakeCalc, liabilityCalc, maxBackStakeCalc, profitBookmakerWins, profitExchangeWins} from "../utils/calc";
 import {useBetting} from "../services/BettingProvider";
 import {BettingService} from "../services/BettingService";
 import {AxiosError} from "axios";
@@ -47,37 +47,48 @@ const Calculator = () => {
 
     const timeout = 1000
     useEffect(() => {
-
-        if (!typing) {
-            if (selectedData?.bookmaker === "Polymarket") {
-                const roundedValue = Math.round(back_stake / selectedData?.meta?.bestAsk) * selectedData?.meta?.bestAsk
-                setBack_stake(roundedValue)
+        if (selectedData){
+            const maxBackStake = maxBackStakeCalc(
+                parseFloat(selectedData?.maxLay),
+                selectedData?.lay ,
+                selectedData?.odds,
+                0
+            )
+            if (!typing) {
+                if (selectedData?.bookmaker === "Polymarket") {
+                    const roundedValue = Math.round(back_stake / selectedData?.meta?.bestAsk) * selectedData?.meta?.bestAsk
+                    setBack_stake(roundedValue)
+                }
+                
+                if (back_stake > maxBackStake) {
+                    setBack_stake(maxBackStake)
+                }
+                
             }
-            // if (selectedData?.bookmaker === "Polymarket"){
-            //     const roundedValue = Math.round(back_stake / selectedData?.meta?.bestAsk) * selectedData?.meta?.bestAsk
-            //     setBack_stake(roundedValue)
-            // }
-            const lay = layStakeCalc(
-                back_odds_input,
-                lay_odds_input,
-                back_stake,
-                exchange_com
-            )
-            const liability = liabilityCalc(
-                lay,
-                lay_odds_input
-            )
-            setLiability(liability)
-            setLay_stake(lay)
-            setLay_win(profitExchangeWins(
-                back_stake,
-                lay,
-                exchange_com
-            ))
-            setBack_win(profitBookmakerWins(back_stake, back_odds_input, liability))
         }
 
     }, [typing]);
+    useEffect(() => {
+
+        const lay = layStakeCalc(
+            back_odds_input,
+            lay_odds_input,
+            back_stake,
+            exchange_com
+        )
+        const liability = liabilityCalc(
+            lay,
+            lay_odds_input
+        )
+        setLiability(liability)
+        setLay_stake(lay)
+        setLay_win(profitExchangeWins(
+            back_stake,
+            lay,
+            exchange_com
+        ))
+        setBack_win(profitBookmakerWins(back_stake, back_odds_input, liability))
+    }, [back_stake, lay_stake, back_odds_input, lay_odds_input]);
     return <Box sx={{...style}}>
         <Box sx={{display: 'grid', gridAutoFlow: 'column',}}>
             <Box sx={{minHeight: '80px', minWidth: '100px',}}>
