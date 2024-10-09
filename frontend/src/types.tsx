@@ -41,12 +41,11 @@ interface OddsCleaned {
     away_team: string;
     odds_last_update: string;
     lay_last_update: string;
+    lay_outcome_id: number;
+    back_outcome_id: number;
     rating: string;
     maxLay: string;
     meta?: {
-        cloudbetMarketKey?: string;
-        cloudbetParams?: string;
-        cloudbetEventId?: string;
         [key: string]: any; 
     };
 }

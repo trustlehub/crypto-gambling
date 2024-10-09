@@ -2,8 +2,6 @@ import React, {useContext, useEffect, useState} from "react";
 import {Box, Button, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography} from "@mui/material";
 import {layStakeCalc, liabilityCalc, maxBackStakeCalc, profitBookmakerWins, profitExchangeWins} from "../utils/calc";
 import {useBetting} from "../services/BettingProvider";
-import {BettingService} from "../services/BettingService";
-import {AxiosError} from "axios";
 
 const style = {
     position: 'absolute' as 'absolute',
@@ -19,7 +17,7 @@ const style = {
 
 const Calculator = () => {
     const bettingProvider = useBetting()
-    const {selectedData, bettingService} = bettingProvider
+    const {selectedData} = bettingProvider
     const [back_odds_input, setBack_odds_input] = useState(selectedData?.odds || 0)
     const [lay_odds_input, setLay_odds_input] = useState(selectedData?.lay || 0)
     const [bookmaker_com, setBookmaker_com] = useState(0)
@@ -47,23 +45,25 @@ const Calculator = () => {
 
     const timeout = 1000
     useEffect(() => {
-        if (selectedData){
+        if (selectedData) {
             const maxBackStake = maxBackStakeCalc(
                 parseFloat(selectedData?.maxLay),
-                selectedData?.lay ,
+                selectedData?.lay,
                 selectedData?.odds,
                 0
             )
             if (!typing) {
-                if (selectedData?.bookmaker === "Polymarket") {
-                    const roundedValue = Math.round(back_stake / selectedData?.meta?.bestAsk) * selectedData?.meta?.bestAsk
-                    setBack_stake(roundedValue)
+                if (selectedData?.bookmaker === "polymarket") {
+                    if (selectedData.meta) {
+                        const roundedValue = Math.round(back_stake / selectedData?.odds) * selectedData?.odds
+                        setBack_stake(roundedValue)
+                    }
                 }
-                
+
                 if (back_stake > maxBackStake) {
                     setBack_stake(maxBackStake)
                 }
-                
+
             }
         }
 
@@ -143,55 +143,31 @@ const Calculator = () => {
                 <Button
                     onClick={async () => {
                         console.log(selectedData)
-                        if (selectedData?.bookmaker === "Cloudbet") {
-                            if (selectedData && selectedData.meta?.cloudbetEventId) {
-                                for (const outcome in selectedData.meta.teamData) {
-                                    if (selectedData.meta.teamData[outcome].name.toLowerCase().includes(selectedData.bet_team)) { // i.e: not the backing team
-                                        bettingService.placeCloudbetBet(
-                                            selectedData.meta.cloudbetEventId,
-                                            `${selectedData.meta.cloudbetMarketKey}/${outcome}`,
-                                            selectedData.odds.toString(),
-                                            back_stake.toString(),
-                                            outcome,
-                                        ).then((e) => {
-                                            setInfo({
-                                                status: "good",
-                                                info: "done"
-                                            })
-                                        }).catch((e: AxiosError) => {
-                                            setInfo({
-                                                status: "error",
-                                                //@ts-ignore
-                                                info: e.response.data
-                                            })
-                                        })
-                                        break;
-                                    }
+                        if (selectedData?.meta) {
+                            const minSize = selectedData?.meta[selectedData.bookmaker].orderMinSize
+                            const response = await fetch(`http://localhost:8000/trade/${selectedData?.back_outcome_id}`, {
+                                method: "POST",
+                                body: JSON.stringify({
+                                    size: minSize ? Math.round(back_stake / minSize) : back_stake,
+                                }),
+                                headers: {
+                                    'Content-Type': "application/json"
                                 }
-                            }
+                            })
 
-                        }
-                        if (selectedData?.bookmaker === "Polymarket") {
-                            bettingService.placePolymarketBet(
-                                selectedData?.meta?.clobTokenId,
-                                selectedData?.meta?.bestAsk,
-                                Math.round(back_stake / selectedData?.meta?.bestAsk),
-                                selectedData?.meta?.conditionId,
-                                parseFloat((1 / selectedData?.odds).toFixed(3)),
-                                "buy",
-                            ).then((e) => {
+                            if (response.status == 200) {
                                 setInfo({
                                     status: "good",
-                                    info: "done"
+                                    info: "Bet placed succesfully"
+
                                 })
-                            }).catch((e: AxiosError) => {
-                                console.log(e)
+                            } else {
                                 setInfo({
                                     status: "error",
-                                    //@ts-ignore
-                                    info: e.response.data.detail
+                                    info: await response.text()
+
                                 })
-                            })
+                            }
                         }
                     }}
                 >
@@ -241,55 +217,30 @@ const Calculator = () => {
 
                 <Button onClick={async () => {
                     console.log(selectedData)
-                    if (selectedData?.exchange === "Cloudbet") {
-                        if (selectedData && selectedData.meta?.cloudbetEventId) {
-                            for (const outcome in selectedData.meta.teamData) {
-                                if (selectedData.meta.teamData[outcome].name.toLowerCase().includes(selectedData.bet_team)) { // i.e: not the backing team
-                                    bettingService.placeCloudbetBet(
-                                        selectedData.meta.cloudbetEventId,
-                                        `${selectedData.meta.cloudbetMarketKey}/${outcome}`,
-                                        selectedData.lay.toString(),
-                                        lay_stake.toString(),
-                                        outcome,
-                                    ).then((e) => {
-                                        console.log('done')
-                                        setInfo({
-                                            status: "good",
-                                            info: "done"
-                                        })
-                                    }).catch((e: AxiosError) => {
-                                        setInfo({
-                                            status: "error",
-                                            //@ts-ignore
-                                            info: e.response.data
-                                        })
-                                    })
-                                    break;
-                                }
+                    if (selectedData?.meta) {
+                        const minSize = selectedData?.meta[selectedData.exchange].orderMinSize
+                        const response = await fetch(`http://localhost:8000/trade/${selectedData?.lay_outcome_id}`, {
+                            method: "POST",
+                            body: JSON.stringify({
+                                size: minSize ? Math.round(lay_stake / minSize) : lay_stake,
+                            }),
+                            headers: {
+                                'Content-Type': "application/json"
                             }
-                        }
-
-                    }
-                    if (selectedData?.exchange === "Polymarket") {
-                        bettingService.placePolymarketBet(
-                            selectedData?.meta?.clobTokenId,
-                            selectedData?.meta?.bestAsk,
-                            Math.round(lay_stake / selectedData?.meta?.bestAsk),
-                            selectedData?.meta?.conditionId,
-                            parseFloat((1 / selectedData?.lay).toFixed(3)),
-                            "buy",
-                        ).then((e) => {
+                        })
+                        if (response.status == 200) {
                             setInfo({
                                 status: "good",
-                                info: "done"
+                                info: "Bet placed succesfully"
+
                             })
-                        }).catch((e: AxiosError) => {
+                        } else {
                             setInfo({
                                 status: "error",
-                                //@ts-ignore
-                                info: e.response.data.detail
+                                info: await response.text()
+
                             })
-                        })
+                        }
                     }
                 }}>
                     Place bets

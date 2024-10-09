@@ -1,10 +1,6 @@
 import React, {createContext, useContext, useEffect, useRef, useState} from 'react';
 import {OddsCleaned} from "../types";
-import {CleanedPolymarketOdds, PolymarketOdds} from "../types/Polymarket";
-import {CloudbetApiData, PolymarketApiData} from "./OddsApiService";
-import {SanitizeOdds_Cloudbet_Polymarket} from "../sanitizers/OddsSanitizer";
 import {BettingContextProps} from "../types/BettingContextProps";
-import {BettingService} from "./BettingService";
 
 // Create a context
 const defaultContextValues: BettingContextProps = {
@@ -43,7 +39,6 @@ const defaultContextValues: BettingContextProps = {
     selectedData: null,
     setSelectedData: () => {
     },
-    bettingService: new BettingService()
 
 };
 const BettingContext = createContext<BettingContextProps>(defaultContextValues); //TODO: add a proper default and type
@@ -69,42 +64,10 @@ export const BettingProvider = ({children}: { children: React.ReactNode }) => {
     const [liability, setLiability] = useState(0);
     const [data, setData] = useState<OddsCleaned[]>([])
     const [selectedData, setSelectedData] = useState<OddsCleaned | null>(null)
-    const bettingService = useRef<BettingService>(defaultContextValues.bettingService)
-    const repeatTillOddsListFull = async () => {
-        let oddsList: PolymarketOdds[] = []
-        const requests = [];
-
-        for (let i = 0; i < 60; i++) {
-            // Collect promises for network requests
-            requests.push(PolymarketApiData(i));
-        }
-
-        try {
-            // Resolve all network requests in parallel
-            const results = await Promise.all(requests);
-
-            // Flatten the result and concatenate with the current oddsList
-            const allData = results.flat(); // Assuming each API call returns an array of odds
-            oddsList = oddsList.concat(allData);
-
-            // Filter out duplicates based on 'id'
-            oddsList = oddsList.filter((item, index, self) =>
-                index === self.findIndex((obj) => obj.id === item.id)
-            );
-
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        }
-
-        return oddsList;
-    }
 
     const getOdds = async () => {
-        const responses = await Promise.all([repeatTillOddsListFull(), CloudbetApiData()])
-        const url = process.env.REACT_APP_POLYMARKET_BET_BASEURL || 'http://localhost:8000';
-        const balanceResponse = await fetch(`${url}/balance/`)
-        const data = await balanceResponse.json()
-        const odds = SanitizeOdds_Cloudbet_Polymarket(responses[0], responses[1], data['balance'])
+        const response = await fetch("http://localhost:8000/get_events/")
+        const odds = await response.json();
         setData(odds)
     }
     return (
@@ -133,7 +96,6 @@ export const BettingProvider = ({children}: { children: React.ReactNode }) => {
                 getOdds,
                 selectedData,
                 setSelectedData,
-                bettingService: bettingService.current,
             }}
         >
             {children}

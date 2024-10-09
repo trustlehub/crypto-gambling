@@ -9,7 +9,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - ENV=production
+      - WALLET_PK=0xe4425319a1fd662a4f296de39dde195a5de9434af1f27ace07076428ce7c15c8
   frontend:
     build: 
       context: ./frontend

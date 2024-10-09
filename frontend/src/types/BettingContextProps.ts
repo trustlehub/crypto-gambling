@@ -1,5 +1,4 @@
 import {OddsCleaned} from "../types";
-import {BettingService} from "../services/BettingService";
 
 export interface BettingContextProps {
     back_odds_input: number;
@@ -33,5 +32,4 @@ export interface BettingContextProps {
     getOdds: () => Promise<void>;
     selectedData: OddsCleaned | null;
     setSelectedData: React.Dispatch<React.SetStateAction<OddsCleaned | null>>;
-    bettingService: BettingService;
 }
