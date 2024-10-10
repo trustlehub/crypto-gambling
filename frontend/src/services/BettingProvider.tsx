@@ -43,6 +43,7 @@ const defaultContextValues: BettingContextProps = {
 };
 const BettingContext = createContext<BettingContextProps>(defaultContextValues); //TODO: add a proper default and type
 
+const baseUrl = process.env.REACT_APP_BASE_URL;
 // Create a provider component
 export const BettingProvider = ({children}: { children: React.ReactNode }) => {
     const [back_odds_input, setBack_odds_input] = useState(0); // initialize as needed
@@ -66,7 +67,7 @@ export const BettingProvider = ({children}: { children: React.ReactNode }) => {
     const [selectedData, setSelectedData] = useState<OddsCleaned | null>(null)
 
     const getOdds = async () => {
-        const response = await fetch("http://localhost:8000/get_events/")
+        const response = await fetch(`${baseUrl}/get_events/`)
         const odds = await response.json();
         setData(odds)
     }

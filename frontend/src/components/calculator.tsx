@@ -15,6 +15,7 @@ const style = {
     p: 4,
 };
 
+const baseUrl = process.env.REACT_APP_BASE_URL;
 const Calculator = () => {
     const bettingProvider = useBetting()
     const {selectedData} = bettingProvider
@@ -145,7 +146,7 @@ const Calculator = () => {
                         console.log(selectedData)
                         if (selectedData?.meta) {
                             const minSize = selectedData?.meta[selectedData.bookmaker].orderMinSize
-                            const response = await fetch(`http://localhost:8000/trade/${selectedData?.back_outcome_id}`, {
+                            const response = await fetch(`${baseUrl}/trade/${selectedData?.back_outcome_id}`, {
                                 method: "POST",
                                 body: JSON.stringify({
                                     size: minSize ? Math.round(back_stake / minSize) : back_stake,
@@ -219,7 +220,7 @@ const Calculator = () => {
                     console.log(selectedData)
                     if (selectedData?.meta) {
                         const minSize = selectedData?.meta[selectedData.exchange].orderMinSize
-                        const response = await fetch(`http://localhost:8000/trade/${selectedData?.lay_outcome_id}`, {
+                        const response = await fetch(`${baseUrl}/trade/${selectedData?.lay_outcome_id}`, {
                             method: "POST",
                             body: JSON.stringify({
                                 size: minSize ? Math.round(lay_stake / minSize) : lay_stake,
