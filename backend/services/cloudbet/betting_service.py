@@ -35,7 +35,7 @@ async def cloudbet_betting_service(outcome: Outcome, stake: str, cloudbet_api: C
                                        {
                                            "currency": currency,
                                            "eventId": str(event_id),
-                                           "marketUrl": f'{outcome.market.meta[outcome.provider.name]['marketKey']}/{_outcome}',
+                                           "marketUrl": f'{outcome.market.meta[outcome.provider.name]["marketKey"]}/{_outcome}',
                                            "price": str(outcome.market.odds),
                                            "stake": str(stake),
                                            "referenceId": referenceId,
