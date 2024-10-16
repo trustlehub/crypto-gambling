@@ -41,7 +41,7 @@ const defaultContextValues: BettingContextProps = {
     },
 
 };
-const BettingContext = createContext<BettingContextProps>(defaultContextValues); //TODO: add a proper default and type
+const BettingContext = createContext<BettingContextProps>(defaultContextValues); 
 
 const baseUrl = process.env.REACT_APP_BASE_URL;
 // Create a provider component

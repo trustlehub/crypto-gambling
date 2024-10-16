@@ -70,7 +70,6 @@ const Calculator = () => {
 
     }, [typing]);
     useEffect(() => {
-
         const lay = layStakeCalc(
             back_odds_input,
             lay_odds_input,

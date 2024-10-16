@@ -7,7 +7,7 @@ from models.polymarket import CleanedPolymarketOdds
 def polymarket_sanitizer(polymarket_data: list[CleanedPolymarketOdds]) -> tuple[list[Event], Provider]:
     polymarketProvider = Provider(
         name='polymarket',
-        is_exchange=True,
+        is_exchange=False,
         is_bookmaker=True
     )
     events: list[Event] = []
@@ -38,7 +38,7 @@ def polymarket_sanitizer(polymarket_data: list[CleanedPolymarketOdds]) -> tuple[
                     name='moneyline',
                     meta={
                         polymarketProvider.name: {
-                            "maxStake": obj.volumeNum,
+                            "maxStake": obj.volumeNum or 0,
                             "minStake": obj.orderMinSize * float(obj.outcomePrices[index]),
                             "currency": "USD",
                         }

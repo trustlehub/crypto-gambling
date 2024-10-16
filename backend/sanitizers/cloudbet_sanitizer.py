@@ -7,7 +7,7 @@ from models.cloudbet import CloudbetEvent
 def cloudbet_sanitizer(cloudbet_data: list[CloudbetEvent]) -> tuple[list[Event], Provider]:
     cloudbetprovider = Provider(
         name='cloudbet',
-        is_exchange=True,
+        is_exchange=False,
         is_bookmaker=True
     )
     events: list[Event] = []
@@ -80,7 +80,6 @@ def cloudbet_sanitizer(cloudbet_data: list[CloudbetEvent]) -> tuple[list[Event],
                     markets=markets,
                     matched=False,
                 )
-                print(f'{event.name}: {event.id}')
                 events.append(e)
                 break
 

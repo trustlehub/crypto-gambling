@@ -66,58 +66,20 @@ async def place_order(request: OrderDetails, outcome_id: int, db: Session = Depe
             return r
         elif provider_name == 'cloudbet':
             r = await cloudbet_betting_service(
-               outcome=outcome,
-               cloudbet_api=cloudbet_api,
-               stake=str(request.size), 
+                outcome=outcome,
+                cloudbet_api=cloudbet_api,
+                stake=str(request.size),
             )
             return r
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Order placement failed: {str(e)}")
 
 
-@app.get("/balance/")
-async def balance_check():
-    resp = client.get_balance_allowance(
-        params=BalanceAllowanceParams(asset_type=AssetType.COLLATERAL)
-    )
-
-    return resp
-
-
-@app.post("/test/trade/")
-async def place_order(order: OrderDetails):
-    try:
-        # Determine order side
-        side = BUY if order.side.lower() == "buy" else SELL
-
-        print(order.size * order.price)
-        # Place the order using py-clob-client
-        market = client.get_market(
-            condition_id=order.condition_id
-        )
-        print(market)
-
-        signed_order = client.create_order(OrderArgs(
-            price=0.01,
-            size=order.size,
-            side=side,
-            token_id=order.token_id
-        )
-        )
-        resp = client.post_order(
-            signed_order,
-            OrderType.FOK)
-
-        return {"status": "success", "response": resp}
-
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Order placement failed: {str(e)}")
-
-
-# To run the app, use: uvicorn main:app --reload
-
 @app.get("/get_events/")
 async def get_events(db: Session = Depends(get_db)):
+    Base.metadata.drop_all(engine)
+    Base.metadata.create_all(engine)
+
     polymarket_data = await fetch_polymarket_data(polymarket_api, 30)
     cloudbet_data = await fetch_cloudbet_data(cloudbet_api)
 
@@ -154,6 +116,7 @@ async def get_events(db: Session = Depends(get_db)):
                         away_team=o2.name,
                         odds_last_update=datetime.now(tz=timezone.utc).isoformat(),
                         lay_last_update=datetime.now(tz=timezone.utc).isoformat(),
+                        lay_as_back=o2.provider.is_bookmaker,
                         rating=rating_calc(
                             o1.market.odds,
                             o2.market.odds,

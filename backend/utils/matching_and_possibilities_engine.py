@@ -35,7 +35,6 @@ async def matching_and_possibilities_engine(cloudbet_events, polymarket_events, 
                 if matches >= 2:
                     matched_events.append((event2, event1))
                 print("\n" * 3)
-    print(len(db.query(Event).all()))
     for event1, event2 in matched_events:
 
         matched_outcomes = []

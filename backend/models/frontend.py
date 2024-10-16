@@ -21,3 +21,4 @@ class OddsCleaned(BaseModel):
     rating: str
     maxLay: str
     meta: Optional[dict] = None
+    lay_as_back: bool

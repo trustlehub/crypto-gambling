@@ -45,6 +45,7 @@ interface OddsCleaned {
     back_outcome_id: number;
     rating: string;
     maxLay: string;
+    lay_as_back: boolean;
     meta?: {
         [key: string]: any; 
     };
