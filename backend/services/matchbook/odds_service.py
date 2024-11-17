@@ -5,10 +5,9 @@ from models.matchbook import MatchbookEvent, MatchbookEvents
 
 
 async def fetch_all_events(api_instance: MatchbookApiInstance) -> list[MatchbookEvent]:
-    url = 'https://api.matchbook.com/edge/rest/events?sport-ids=1&states=open&exchange-type=back-lay&side=side'
+    url = 'https://api.matchbook.com/edge/rest/events?sport-ids=1&states=open&exchange-type=back-lay&side=lay'
 
-    response = await api_instance.get(f'{url}')
-    data = await response.json()
+    data = await api_instance.get(f'{url}')
     serialized_response = MatchbookEvents(**data)
     events = [*serialized_response.events]
 

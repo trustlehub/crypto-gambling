@@ -1,18 +1,24 @@
-from enum import Enum
-from typing import List, Dict, Optional
+from typing import List
 
-from pydantic import BaseModel, RootModel
+from pydantic import BaseModel, ConfigDict
 
-class MatchbookPrice(BaseModel):
+
+class UnderscoreAliasModel(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=lambda field: field.replace('_', '-')
+    )
+
+
+class MatchbookPrice(UnderscoreAliasModel):
     available_amount: float
     currency: str
     decimal_odds: float
     side: str
     odds_type: str
     exchange_type: str
-    
-    
-class MatchbookRunner(BaseModel):
+
+
+class MatchbookRunner(UnderscoreAliasModel):
     withdrawn: bool
     prices: List[MatchbookPrice]
     last_price_update_time: str
@@ -22,28 +28,31 @@ class MatchbookRunner(BaseModel):
     name: str
     status: str
     event_participant_id: int
-    
-class MatchbookMarket(BaseModel):
+
+
+class MatchbookMarket(UnderscoreAliasModel):
     live: bool
     id: int
     event_id: int
-    status: bool
+    status: str
     market_type: str
     volume: float
     runners: List[MatchbookRunner]
     last_price_update_time: str
     withdrawn: bool
 
-class MatchbookEvent(BaseModel):
+
+class MatchbookEvent(UnderscoreAliasModel):
     id: int
     name: str
     start: str
     sport_id: int
-    status: str # prolly an enum. figure it out
+    status: str  # prolly an enum. figure it out
     volume: float
     markets: List[MatchbookMarket]
 
-class MatchbookEvents(BaseModel):
+
+class MatchbookEvents(UnderscoreAliasModel):
     offset: int
     events: List[MatchbookEvent]
     per_page: int
