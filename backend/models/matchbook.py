@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict
 
@@ -19,9 +19,9 @@ class MatchbookPrice(UnderscoreAliasModel):
 
 
 class MatchbookRunner(UnderscoreAliasModel):
-    withdrawn: bool
+    withdrawn: Optional[bool] = None
     prices: List[MatchbookPrice]
-    last_price_update_time: str
+    last_price_update_time: Optional[str] = None
     event_id: int
     id: int
     market_id: int
