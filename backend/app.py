@@ -1,33 +1,30 @@
+from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from itertools import permutations
 
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from requests import Session
 
 from apis.cloudbet import CloudbetApiInstance
+from apis.matchbook import MatchbookApiInstance
 from apis.polymarket import PolymarketApiInstance
 from db import SessionLocal, Base, engine, Outcome, Event
 from models.frontend import OddsCleaned
 from sanitizers.cloudbet_sanitizer import cloudbet_sanitizer
+from sanitizers.matchbook_sanitizer import matchbook_sanitizer
 from sanitizers.polymarket_sanitizer import polymarket_sanitizer
 from services.cloudbet.betting_service import cloudbet_betting_service
 from services.cloudbet.odds_service import fetch_all_events as fetch_cloudbet_data
 from services.polymarket.betting_service import polymarket_betting_service
 from services.polymarket.odds_service import fetch_all_events as fetch_polymarket_data
+from services.matchbook.odds_service import fetch_all_events as fetch_matchbook_data
 from utils.calculations import rating_calc
 from utils.matching_and_possibilities_engine import matching_and_possibilities_engine
 
-app = FastAPI()
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins
-    allow_credentials=True,
-    allow_methods=["*"],  # Allows all methods (GET, POST, etc.)
-    allow_headers=["*"],  # Allows all headers
-)
-Base.metadata.create_all(bind=engine)
+load_dotenv()
 
 # Creating the instance with base URL and API key
 cloudbet_api = CloudbetApiInstance({
@@ -36,6 +33,32 @@ cloudbet_api = CloudbetApiInstance({
 })
 
 polymarket_api = PolymarketApiInstance()
+
+matchbook_api = MatchbookApiInstance()
+
+
+@asynccontextmanager
+async def app_lifespan(app: FastAPI):
+    # Startup logic
+    print("Starting up...")
+    # await matchbook_api.authenticate(
+    #     username="kidfrommars",
+    #     password="L1a2s3a4n5"
+    # )
+    yield  # Control transfers to the application here
+    # Shutdown logic
+    print("Shutting down...")
+
+
+app = FastAPI(lifespan=app_lifespan)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods (GET, POST, etc.)
+    allow_headers=["*"],  # Allows all headers
+)
+Base.metadata.create_all(bind=engine)
 
 
 # Dependency for getting the session
@@ -82,11 +105,13 @@ async def get_events(db: Session = Depends(get_db)):
 
     polymarket_data = await fetch_polymarket_data(polymarket_api, 30)
     cloudbet_data = await fetch_cloudbet_data(cloudbet_api)
+    matchbook_data = await fetch_matchbook_data(matchbook_api)
 
     polymarket_events, polymarket_provider = polymarket_sanitizer(polymarket_data)
     cloudbet_events, cloudbet_provider = cloudbet_sanitizer(cloudbet_data)
+    matchbook_events, matchbook_provider = matchbook_sanitizer(matchbook_data)
 
-    await matching_and_possibilities_engine(cloudbet_events, polymarket_events, db)
+    await matching_and_possibilities_engine([cloudbet_events, matchbook_events], db)
 
     events = db.query(Event).filter(Event.matched == True).all()
     final_odds: list[OddsCleaned] = []
