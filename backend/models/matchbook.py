@@ -27,7 +27,7 @@ class MatchbookRunner(UnderscoreAliasModel):
     market_id: int
     name: str
     status: str
-    event_participant_id: int
+    event_participant_id: Optional[int] = None
 
 
 class MatchbookMarket(UnderscoreAliasModel):
