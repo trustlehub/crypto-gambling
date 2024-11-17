@@ -38,8 +38,6 @@ class MatchbookMarket(UnderscoreAliasModel):
     market_type: str
     volume: float
     runners: List[MatchbookRunner]
-    last_price_update_time: str
-    withdrawn: bool
 
 
 class MatchbookEvent(UnderscoreAliasModel):
