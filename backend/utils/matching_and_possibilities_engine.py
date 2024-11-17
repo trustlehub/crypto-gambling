@@ -6,9 +6,9 @@ from fuzzywuzzy import fuzz
 from db import Event, MatchedOutcome
 
 
-async def matching_and_possibilities_engine(cloudbet_events, polymarket_events, db):
+async def matching_and_possibilities_engine(events, db):
     matched_events: list[tuple[Event, Event]] = []
-    sources = [polymarket_events, cloudbet_events]
+    sources = [*events]
     # Matching engine + possibilities engine
     for list1, list2 in combinations(sources, 2):
         # For each pair, iterate over the Cartesian product of the events
