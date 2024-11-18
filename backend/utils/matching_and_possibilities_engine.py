@@ -10,9 +10,9 @@ from db import Event, MatchedOutcome, Provider
 
 async def matching_and_possibilities_engine(events, db):
     matched_events: list[tuple[Event, Event]] = []
-    sources = [db.query(Event).filter(Event.matched == False, Provider.name == 'matchbook').all(),
-               db.query(Event).filter(Event.matched == False, Provider.name == 'cloudbet').all(),
-               db.query(Event).filter(Event.matched == False, Provider.name == 'polymarket').all(),
+    sources = [db.query(Event).join(Provider).filter(Event.matched == False, Provider.name == 'matchbook').all(),
+               db.query(Event).join(Provider).filter(Event.matched == False, Provider.name == 'cloudbet').all(),
+               db.query(Event).join(Provider).filter(Event.matched == False, Provider.name == 'polymarket').all(),
                ]
     # Matching engine + possibilities engine
 
