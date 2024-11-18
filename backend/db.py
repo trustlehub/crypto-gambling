@@ -14,13 +14,28 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 class PrintableBase():
     def to_dict(self):
-        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+        
+        data = {column.name: getattr(self, column.name) for column in self.__table__.columns}
+        # Now add the relationship fields dynamically
+        for rel_name, rel in self.__mapper__.relationships.items():
+            related_obj = getattr(self, rel_name)
+            if related_obj is not None:
+                # If the related object is a list (one-to-many), handle accordingly
+                if isinstance(related_obj, list):
+                    data[rel_name] = [obj.to_dict() for obj in related_obj]
+                else:
+                    # If it's a single object (many-to-one or one-to-one)
+                    data[rel_name] = related_obj.to_dict()
+            else:
+                data[rel_name] = None
+        return data
 
     def __repr__(self):
         return json.dumps(self.to_dict(), indent=4)
 
 class Provider(Base, PrintableBase):
     __tablename__ = 'providers'
+    
 
     id = Column(Integer, primary_key=True, unique=True, nullable=False, autoincrement=True)
     name = Column(String, nullable=False)
@@ -71,6 +86,7 @@ class Market(Base, PrintableBase):
 
 class Event(Base, PrintableBase):
     __tablename__ = 'events'
+    
 
     id = Column(Integer, primary_key=True, unique=True, nullable=False, autoincrement=True)
     name = Column(String, nullable=False)
