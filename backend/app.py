@@ -26,6 +26,9 @@ from utils.matching_and_possibilities_engine import matching_and_possibilities_e
 
 load_dotenv()
 
+import logging as lg
+lg.basicConfig(level=lg.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p',filename='app.log' )
+
 # Creating the instance with base URL and API key
 cloudbet_api = CloudbetApiInstance({
     'baseURL': 'https://sports-api.cloudbet.com/pub',
@@ -111,19 +114,21 @@ async def get_events(db: Session = Depends(get_db)):
     cloudbet_events, cloudbet_provider = cloudbet_sanitizer(cloudbet_data)
     matchbook_events, matchbook_provider = matchbook_sanitizer(matchbook_data)
 
-    await matching_and_possibilities_engine([cloudbet_events, matchbook_events], db)
+    await matching_and_possibilities_engine([cloudbet_events, matchbook_events, polymarket_events], db)
 
     events = db.query(Event).filter(Event.matched == True).all()
     final_odds: list[OddsCleaned] = []
     total = 0
     for event in events:
+        lg.debug(f"event: {event}")
         outcomes: list[Outcome] = event.outcomes
+        lg.debug(f"outcomes: {outcomes}")
         for o1, o2 in permutations(outcomes, 2):
             if o2 in o1.matched_outcome.outcomes:
-                print("skipping this combination: same team")
+                lg.info("skipping this combination: same team")
                 continue
             elif o1.provider_id == o2.provider_id:
-                print("skipping this combination: same provider")
+                lg.info("skipping this combination: same provider")
             else:
                 final_odds.append(
                     # o1 is the bet_team and o2 is the lay team. so o1's provider is 

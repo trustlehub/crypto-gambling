@@ -4,7 +4,9 @@ from itertools import combinations, product
 from fuzzywuzzy import fuzz
 
 from db import Event, MatchedOutcome
+import logging as lg
 
+lg.basicConfig(level=lg.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p',filename='matching_engine.log' )
 
 async def matching_and_possibilities_engine(events, db):
     matched_events: list[tuple[Event, Event]] = []
@@ -18,7 +20,7 @@ async def matching_and_possibilities_engine(events, db):
         # For each pair, iterate over the Cartesian product of the events
         for event1, event2 in product(list1, list2):
 
-            # Time difference is mainly how we recognise events
+            # Time difference is mainly how we recognise events are similar
             time_difference = (abs(
                 datetime.fromisoformat(event2.start_time) - datetime.fromisoformat(event1.start_time))
                                .total_seconds())
@@ -26,26 +28,28 @@ async def matching_and_possibilities_engine(events, db):
             if time_difference == 0:
                 matches = 0
 
-                for c_team in event1.outcomes:
-                    for p_team in event2.outcomes:
-                        similarity = fuzz.ratio(c_team.name.lower(), p_team.name.lower())
+                for team1 in event1.outcomes:
+                    for team2 in event2.outcomes:
+                        similarity = fuzz.ratio(team1.name.lower(), team2.name.lower())
                         threshold = 50
                         if similarity > threshold:
                             matches += 1
                         if matches >= 2:
+                            # Two teams matched as well. No need to loop again
                             break
-                        print(f'similarity: {similarity} || c_team:{c_team.name}, p_team:{p_team.name}')
+                        lg.debug(f'similarity: {similarity} || team1:{team1.name}, team2:{team2.name}')
 
                     if matches >= 2:
+                        # Two teams matched as well. No need to loop again
                         break
 
                 if matches >= 2:
                     matched_events.append((event2, event1))
-                print("\n" * 3)
+                lg.debug("\n" * 3)
             else:
-                print(f"Didn't match events because of time mismatch. time diff: {time_difference} ")
-                print(f"Events: {event1.name} and {event2.name}")
-                print("=" * 10 + "\n" * 4)
+                lg.debug(f"Didn't match events because of time mismatch. time diff: {time_difference} ")
+                lg.debug(f"Events: {event1.name} and {event2.name}")
+                lg.debug("=" * 10 + "\n" * 2)
 
     for event1, event2 in matched_events:
 
@@ -76,5 +80,5 @@ async def matching_and_possibilities_engine(events, db):
             )
         )
 
-        print(f"Matched: {event1.name} || {event2.name} ")
+        lg.debug(f"Matched: {event1.name} || {event2.name} ")
     db.commit()
