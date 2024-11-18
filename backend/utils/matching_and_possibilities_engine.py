@@ -10,12 +10,19 @@ async def matching_and_possibilities_engine(events, db):
     matched_events: list[tuple[Event, Event]] = []
     sources = [*events]
     # Matching engine + possibilities engine
+
+    # Get combinations of 2 event lists from the list of sources. This ensures 
+    # all events from all apis are matched properly with each other
+
     for list1, list2 in combinations(sources, 2):
         # For each pair, iterate over the Cartesian product of the events
         for event1, event2 in product(list1, list2):
+
+            # Time difference is mainly how we recognise events
             time_difference = (abs(
                 datetime.fromisoformat(event2.start_time) - datetime.fromisoformat(event1.start_time))
                                .total_seconds())
+
             if time_difference == 0:
                 matches = 0
 
@@ -35,6 +42,11 @@ async def matching_and_possibilities_engine(events, db):
                 if matches >= 2:
                     matched_events.append((event2, event1))
                 print("\n" * 3)
+            else:
+                print(f"Didn't match events because of time mismatch. time diff: {time_difference} ")
+                print(f"Events: {event1.name} and {event2.name}")
+                print("=" * 10 + "\n" * 4)
+
     for event1, event2 in matched_events:
 
         matched_outcomes = []
