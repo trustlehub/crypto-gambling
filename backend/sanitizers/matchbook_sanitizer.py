@@ -54,6 +54,7 @@ def matchbook_sanitizer(events: List[MatchbookEvent]) -> tuple[list[Event], Prov
                 outcomes=outcomes_list,
                 markets=markets_list,
                 matched=False,
+                
             )
         )
         return event_list, matchbook_provider
