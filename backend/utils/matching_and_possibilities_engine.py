@@ -24,6 +24,10 @@ async def matching_and_possibilities_engine(events, db):
                 datetime.fromisoformat(event2.start_time) - datetime.fromisoformat(event1.start_time))
                                .total_seconds())
             if event1.providers == event2.providers:
+                for provider in event1.providers:
+                    print(provider.name)
+                for provider in event2.providers:
+                    print(provider.name)
                 lg.debug("Providers are same. Something wrong")
 
             if time_difference == 0:
