@@ -6,7 +6,7 @@ from fuzzywuzzy import fuzz
 from db import Event, MatchedOutcome
 import logging as lg
 
-lg.basicConfig(level=lg.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p',filename='matching_engine.log' )
+lg.basicConfig(level=lg.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p',filename='/logs/matching_engine.log' )
 
 async def matching_and_possibilities_engine(events, db):
     matched_events: list[tuple[Event, Event]] = []

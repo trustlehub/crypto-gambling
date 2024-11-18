@@ -27,7 +27,7 @@ from utils.matching_and_possibilities_engine import matching_and_possibilities_e
 load_dotenv()
 
 import logging as lg
-lg.basicConfig(level=lg.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p',filename='app.log' )
+lg.basicConfig(level=lg.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p',filename='/logs/app.log' )
 
 # Creating the instance with base URL and API key
 cloudbet_api = CloudbetApiInstance({
