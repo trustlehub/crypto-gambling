@@ -49,18 +49,19 @@ def matchbook_sanitizer(events: List[MatchbookEvent], db) -> tuple[list[Event], 
                         outcome=db_outcome
 
                     ))
-        event_list.append(
-            Event(
-                name=event.name,
-                last_updated=str(datetime.now(timezone.utc)),
-                start_time=event.start,
-                providers=[matchbook_provider, ],
-                outcomes=outcomes_list,
-                markets=markets_list,
-                matched=False,
+        if len(outcomes_list) > 0 and len(markets_list) > 0:
+            event_list.append(
+                Event(
+                    name=event.name,
+                    last_updated=str(datetime.now(timezone.utc)),
+                    start_time=event.start,
+                    providers=[matchbook_provider, ],
+                    outcomes=outcomes_list,
+                    markets=markets_list,
+                    matched=False,
 
+                )
             )
-        )
 
     db.add_all(event_list)
     db.commit()
