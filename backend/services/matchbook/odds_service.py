@@ -16,10 +16,13 @@ async def fetch_all_events(api_instance: MatchbookApiInstance) -> list[Matchbook
         requests.append(api_instance.get(f"{url}&offset={i}"))
 
     responses = await asyncio.gather(*requests)
+    print(f"Got {len(responses)} responses from matchbook")
 
     for r in responses:
         data = await r.json()
         s = MatchbookEvents(**data)
         events.append(*s.events)
+
+    print(f"Got {len(events)} events from matchbook")
 
     return events
