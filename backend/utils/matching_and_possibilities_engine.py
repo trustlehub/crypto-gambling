@@ -5,12 +5,15 @@ from itertools import combinations, product
 from fuzzywuzzy import fuzz
 from sqlalchemy.orm import joinedload
 
-from db import Event, MatchedOutcome
+from db import Event, MatchedOutcome, Provider
 
 
 async def matching_and_possibilities_engine(events, db):
     matched_events: list[tuple[Event, Event]] = []
-    sources = [*db.query(Event).filter(Event.matched == False).all()]
+    sources = [*db.query(Event).filter(Event.matched == False, Provider.name == 'matchbook').all(),
+               *db.query(Event).filter(Event.matched == False, Provider.name == 'cloudbet').all(),
+               *db.query(Event).filter(Event.matched == False, Provider.name == 'polymarket').all(),
+               ]
     # Matching engine + possibilities engine
 
     # Get combinations of 2 event lists from the list of sources. This ensures 
