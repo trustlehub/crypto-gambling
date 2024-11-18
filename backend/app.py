@@ -28,7 +28,6 @@ load_dotenv()
 
 import logging as lg
 lg.basicConfig(level=lg.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p',filename='/logs/app.log' )
-lg.getLogger('sqlalchemy.engine').setLevel(lg.INFO)
 
 # Creating the instance with base URL and API key
 cloudbet_api = CloudbetApiInstance({
