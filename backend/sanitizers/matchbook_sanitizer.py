@@ -34,8 +34,8 @@ def matchbook_sanitizer(events: List[MatchbookEvent]) -> tuple[list[Event], Prov
                         odds=price.decimal_odds,
                         meta={
                             "volume": market.volume,
-                            'last_updated': market.last_price_update_time,
-                            'withdrawn': market.withdrawn,
+                            'last_updated': runner.last_price_update_time,
+                            'withdrawn': (market.withdrawn if hasattr(market, 'withdrawn') else None),
                         },
                         outcome=db_outcome 
 
