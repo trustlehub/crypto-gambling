@@ -28,6 +28,7 @@ class MatchbookRunner(UnderscoreAliasModel):
     name: str
     status: str
     event_participant_id: Optional[int] = None
+    volume: int
 
 
 class MatchbookMarket(UnderscoreAliasModel):
