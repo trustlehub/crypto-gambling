@@ -27,6 +27,7 @@ def matchbook_sanitizer(events: List[MatchbookEvent]) -> tuple[list[Event], Prov
                         meta={
                             'volume': runner.volume,
                         },
+                        provider=matchbook_provider,
                     )
                     outcomes_list.append(db_outcome)
                     markets_list.append(Market(
