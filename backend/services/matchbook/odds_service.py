@@ -23,6 +23,9 @@ async def fetch_all_events(api_instance: MatchbookApiInstance) -> list[Matchbook
         s = MatchbookEvents(**data)
         events.append(*s.events)
 
+    for event in events:
+        print(event.name)
+
     print(f"Got {len(events)} events from matchbook")
 
     return events
