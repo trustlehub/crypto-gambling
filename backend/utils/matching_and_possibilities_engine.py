@@ -1,6 +1,6 @@
 from datetime import datetime
 from itertools import combinations, product
-
+from sqlalchemy.orm import joinedload
 from fuzzywuzzy import fuzz
 
 from db import Event, MatchedOutcome
@@ -23,10 +23,8 @@ async def matching_and_possibilities_engine(events, db):
             time_difference = (abs(
                 datetime.fromisoformat(event2.start_time) - datetime.fromisoformat(event1.start_time))
                                .total_seconds())
-            lg.debug("="*10)
-            lg.debug(f"{event1}")
-            lg.debug(f"{event2}")
             if event1.providers == event2.providers:
+                lg.debug(f"{db.query(Event).options(joinedload(Event.outcomes)).filter(Event.id == event1.id).all()}")
                 lg.debug("Providers are same. Something wrong")
 
             if time_difference == 0:
