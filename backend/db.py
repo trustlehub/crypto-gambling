@@ -14,21 +14,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 class PrintableBase():
     def to_dict(self):
-        
-        data = {column.name: getattr(self, column.name) for column in self.__table__.columns}
-        # Now add the relationship fields dynamically
-        for rel_name, rel in self.__mapper__.relationships.items():
-            related_obj = getattr(self, rel_name)
-            if related_obj is not None:
-                # If the related object is a list (one-to-many), handle accordingly
-                if isinstance(related_obj, list):
-                    data[rel_name] = [obj.to_dict() for obj in related_obj]
-                else:
-                    # If it's a single object (many-to-one or one-to-one)
-                    data[rel_name] = related_obj.to_dict()
-            else:
-                data[rel_name] = None
-        return data
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
     def __repr__(self):
         return json.dumps(self.to_dict(), indent=4)
@@ -46,6 +32,11 @@ class Provider(Base, PrintableBase):
     event_id = Column(Integer, ForeignKey('events.id'), nullable=False)
     events = relationship("Event", back_populates="providers")
 
+    def to_dict(self):
+        data = {column.name: getattr(self, column.name) for column in self.__table__.columns}
+        # Add relationship fields
+        data['events'] = self.events.to_dict() if self.events else None
+        return data
 
 class Outcome(Base, PrintableBase):
     __tablename__ = 'outcomes'
@@ -69,6 +60,14 @@ class Outcome(Base, PrintableBase):
     matched_outcome_id = Column(Integer, ForeignKey('matched_outcomes.id'), nullable=True)
     matched_outcome = relationship("MatchedOutcome", back_populates="outcomes")
 
+    def to_dict(self):
+        data = {column.name: getattr(self, column.name) for column in self.__table__.columns}
+        # Add relationship fields
+        data['provider'] = self.provider.to_dict() if self.provider else None
+        data['event'] = self.event.to_dict() if self.event else None
+        data['matched_outcome'] = self.matched_outcome.to_dict() if self.matched_outcome else None
+        return data
+
 
 class Market(Base, PrintableBase):
     __tablename__ = 'markets'
@@ -82,6 +81,13 @@ class Market(Base, PrintableBase):
 
     outcome = relationship("Outcome", back_populates="market")
     event = relationship("Event", back_populates="markets")
+
+    def to_dict(self):
+        data = {column.name: getattr(self, column.name) for column in self.__table__.columns}
+        # Add relationship fields
+        data['outcome'] = self.outcome.to_dict() if self.outcome else None
+        data['event'] = self.event.to_dict() if self.event else None
+        return data
 
 
 class Event(Base, PrintableBase):
@@ -100,7 +106,14 @@ class Event(Base, PrintableBase):
 
     markets = relationship("Market", back_populates="event",cascade="all, delete-orphan")
     outcomes = relationship("Outcome", back_populates="event",cascade="all, delete-orphan")
-
+    
+    def to_dict(self):
+        data = {column.name: getattr(self, column.name) for column in self.__table__.columns}
+        # Add relationship fields
+        data['providers'] = [provider.to_dict() for provider in self.providers]
+        data['markets'] = [market.to_dict() for market in self.markets]
+        data['outcomes'] = [outcome.to_dict() for outcome in self.outcomes]
+        return data
 
 class MatchedOutcome(Base, PrintableBase):
     __tablename__ = 'matched_outcomes'
@@ -108,3 +121,8 @@ class MatchedOutcome(Base, PrintableBase):
 
     outcomes = relationship("Outcome", back_populates="matched_outcome",cascade="all, delete-orphan")
     
+    def to_dict(self):
+        data = {column.name: getattr(self, column.name) for column in self.__table__.columns}
+        # Add relationship fields
+        data['outcomes'] = [outcome.to_dict() for outcome in self.outcomes]
+        return data
