@@ -21,7 +21,9 @@ def matchbook_sanitizer(events: List[MatchbookEvent], db) -> tuple[list[Event], 
                 continue
 
             for runner in market.runners:
+                # Runners are the team names (outcomes) in matchbook
                 for price in runner.prices:
+                    # Prices are the lay bets placed by other users
                     db_outcome = Outcome(
                         name=runner.name,
                         meta={
