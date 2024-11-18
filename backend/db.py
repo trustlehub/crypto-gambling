@@ -21,7 +21,6 @@ class PrintableBase():
 
 class Provider(Base, PrintableBase):
     __tablename__ = 'providers'
-    
 
     id = Column(Integer, primary_key=True, unique=True, nullable=False, autoincrement=True)
     name = Column(String, nullable=False)
@@ -32,11 +31,6 @@ class Provider(Base, PrintableBase):
     event_id = Column(Integer, ForeignKey('events.id'), nullable=False)
     events = relationship("Event", back_populates="providers")
 
-    def to_dict(self):
-        data = {column.name: getattr(self, column.name) for column in self.__table__.columns}
-        # Add relationship fields
-        data['events'] = self.events.to_dict() if self.events else None
-        return data
 
 class Outcome(Base, PrintableBase):
     __tablename__ = 'outcomes'
@@ -60,14 +54,6 @@ class Outcome(Base, PrintableBase):
     matched_outcome_id = Column(Integer, ForeignKey('matched_outcomes.id'), nullable=True)
     matched_outcome = relationship("MatchedOutcome", back_populates="outcomes")
 
-    def to_dict(self):
-        data = {column.name: getattr(self, column.name) for column in self.__table__.columns}
-        # Add relationship fields
-        data['provider'] = self.provider.to_dict() if self.provider else None
-        data['event'] = self.event.to_dict() if self.event else None
-        data['matched_outcome'] = self.matched_outcome.to_dict() if self.matched_outcome else None
-        return data
-
 
 class Market(Base, PrintableBase):
     __tablename__ = 'markets'
@@ -81,13 +67,6 @@ class Market(Base, PrintableBase):
 
     outcome = relationship("Outcome", back_populates="market")
     event = relationship("Event", back_populates="markets")
-
-    def to_dict(self):
-        data = {column.name: getattr(self, column.name) for column in self.__table__.columns}
-        # Add relationship fields
-        data['outcome'] = self.outcome.to_dict() if self.outcome else None
-        data['event'] = self.event.to_dict() if self.event else None
-        return data
 
 
 class Event(Base, PrintableBase):
@@ -106,14 +85,7 @@ class Event(Base, PrintableBase):
 
     markets = relationship("Market", back_populates="event",cascade="all, delete-orphan")
     outcomes = relationship("Outcome", back_populates="event",cascade="all, delete-orphan")
-    
-    def to_dict(self):
-        data = {column.name: getattr(self, column.name) for column in self.__table__.columns}
-        # Add relationship fields
-        data['providers'] = [provider.to_dict() for provider in self.providers]
-        data['markets'] = [market.to_dict() for market in self.markets]
-        data['outcomes'] = [outcome.to_dict() for outcome in self.outcomes]
-        return data
+
 
 class MatchedOutcome(Base, PrintableBase):
     __tablename__ = 'matched_outcomes'
@@ -121,8 +93,3 @@ class MatchedOutcome(Base, PrintableBase):
 
     outcomes = relationship("Outcome", back_populates="matched_outcome",cascade="all, delete-orphan")
     
-    def to_dict(self):
-        data = {column.name: getattr(self, column.name) for column in self.__table__.columns}
-        # Add relationship fields
-        data['outcomes'] = [outcome.to_dict() for outcome in self.outcomes]
-        return data
