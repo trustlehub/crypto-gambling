@@ -110,9 +110,9 @@ async def get_events(db: Session = Depends(get_db)):
     cloudbet_data = await fetch_cloudbet_data(cloudbet_api)
     matchbook_data = await fetch_matchbook_data(matchbook_api)
 
-    polymarket_events, polymarket_provider = polymarket_sanitizer(polymarket_data)
-    cloudbet_events, cloudbet_provider = cloudbet_sanitizer(cloudbet_data)
-    matchbook_events, matchbook_provider = matchbook_sanitizer(matchbook_data)
+    polymarket_events, polymarket_provider = polymarket_sanitizer(polymarket_data, db)
+    cloudbet_events, cloudbet_provider = cloudbet_sanitizer(cloudbet_data, db)
+    matchbook_events, matchbook_provider = matchbook_sanitizer(matchbook_data, db)
 
     await matching_and_possibilities_engine([cloudbet_events, matchbook_events, polymarket_events], db)
 

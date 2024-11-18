@@ -4,7 +4,7 @@ from db import Provider, Market, Event, Outcome
 from models.cloudbet import CloudbetEvent
 
 
-def cloudbet_sanitizer(cloudbet_data: list[CloudbetEvent]) -> tuple[list[Event], Provider]:
+def cloudbet_sanitizer(cloudbet_data: list[CloudbetEvent], db) -> tuple[list[Event], Provider]:
     cloudbetprovider = Provider(
         name='cloudbet',
         is_exchange=False,
@@ -82,5 +82,6 @@ def cloudbet_sanitizer(cloudbet_data: list[CloudbetEvent]) -> tuple[list[Event],
                 )
                 events.append(e)
                 break
-
+    db.add_all(events)
+    db.commit()
     return events, cloudbetprovider

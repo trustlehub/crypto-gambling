@@ -5,7 +5,7 @@ from db import Market, Outcome, Event, Provider
 from models.matchbook import MatchbookEvent
 
 
-def matchbook_sanitizer(events: List[MatchbookEvent]) -> tuple[list[Event], Provider]:
+def matchbook_sanitizer(events: List[MatchbookEvent], db) -> tuple[list[Event], Provider]:
     matchbook_provider = Provider(
         name='matchbook',
         is_exchange=True,
@@ -59,4 +59,7 @@ def matchbook_sanitizer(events: List[MatchbookEvent]) -> tuple[list[Event], Prov
 
             )
         )
+
+    db.add_all(event_list)
+    db.commit()
     return event_list, matchbook_provider

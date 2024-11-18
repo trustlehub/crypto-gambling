@@ -4,7 +4,7 @@ from db import Provider, Market, Event, Outcome
 from models.polymarket import CleanedPolymarketOdds
 
 
-def polymarket_sanitizer(polymarket_data: list[CleanedPolymarketOdds]) -> tuple[list[Event], Provider]:
+def polymarket_sanitizer(polymarket_data: list[CleanedPolymarketOdds], db) -> tuple[list[Event], Provider]:
     polymarketProvider = Provider(
         name='polymarket',
         is_exchange=False,
@@ -66,4 +66,6 @@ def polymarket_sanitizer(polymarket_data: list[CleanedPolymarketOdds]) -> tuple[
             )
             events.append(event)
 
+    db.add_all(events)
+    db.commit()
     return events, polymarketProvider
