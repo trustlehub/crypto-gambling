@@ -12,14 +12,14 @@ SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"  # Change this to your DB URL
 engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-class PrintableBase(Base):
+class PrintableBase():
     def to_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
     def __repr__(self):
         return json.dumps(self.to_dict(), indent=4)
 
-class Provider(PrintableBase):
+class Provider(Base, PrintableBase):
     __tablename__ = 'providers'
 
     id = Column(Integer, primary_key=True, unique=True, nullable=False, autoincrement=True)
@@ -32,7 +32,7 @@ class Provider(PrintableBase):
     events = relationship("Event", back_populates="providers")
 
 
-class Outcome(PrintableBase):
+class Outcome(Base, PrintableBase):
     __tablename__ = 'outcomes'
 
     id = Column(Integer, primary_key=True, unique=True, nullable=False, autoincrement=True)
@@ -55,7 +55,7 @@ class Outcome(PrintableBase):
     matched_outcome = relationship("MatchedOutcome", back_populates="outcomes")
 
 
-class Market(PrintableBase):
+class Market(Base, PrintableBase):
     __tablename__ = 'markets'
 
     id = Column(Integer, primary_key=True, unique=True, nullable=False, autoincrement=True)
@@ -69,7 +69,7 @@ class Market(PrintableBase):
     event = relationship("Event", back_populates="markets")
 
 
-class Event(PrintableBase):
+class Event(Base, PrintableBase):
     __tablename__ = 'events'
 
     id = Column(Integer, primary_key=True, unique=True, nullable=False, autoincrement=True)
@@ -86,7 +86,7 @@ class Event(PrintableBase):
     outcomes = relationship("Outcome", back_populates="event",cascade="all, delete-orphan")
 
 
-class MatchedOutcome(PrintableBase):
+class MatchedOutcome(Base, PrintableBase):
     __tablename__ = 'matched_outcomes'
     id = Column(Integer, primary_key=True, unique=True, nullable=False, autoincrement=True)
 
