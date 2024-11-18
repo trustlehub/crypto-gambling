@@ -11,7 +11,7 @@ def matchbook_sanitizer(events: List[MatchbookEvent]) -> tuple[list[Event], Prov
         is_exchange=True,
         is_bookmaker=False
     )
-    event_list =[]
+    event_list = []
     for event in events:
         markets_list = []
         outcomes_list = []
@@ -25,7 +25,9 @@ def matchbook_sanitizer(events: List[MatchbookEvent]) -> tuple[list[Event], Prov
                     db_outcome = Outcome(
                         name=runner.name,
                         meta={
-                            'volume': runner.volume,
+                            matchbook_provider.name: {
+                                'volume': runner.volume,
+                            }
                         },
                         provider=matchbook_provider,
                     )
@@ -34,11 +36,13 @@ def matchbook_sanitizer(events: List[MatchbookEvent]) -> tuple[list[Event], Prov
                         name=market.name,
                         odds=price.decimal_odds,
                         meta={
-                            "volume": market.volume,
-                            'last_updated': runner.last_price_update_time,
-                            'withdrawn': (market.withdrawn if hasattr(market, 'withdrawn') else None),
+                            matchbook_provider.name: {
+                                "volume": market.volume,
+                                'last_updated': runner.last_price_update_time,
+                                'withdrawn': (market.withdrawn if hasattr(market, 'withdrawn') else None),
+                            }
                         },
-                        outcome=db_outcome 
+                        outcome=db_outcome
 
                     ))
         event_list.append(
@@ -51,5 +55,5 @@ def matchbook_sanitizer(events: List[MatchbookEvent]) -> tuple[list[Event], Prov
                 markets=markets_list,
                 matched=False,
             )
-        ) 
+        )
         return event_list, matchbook_provider
