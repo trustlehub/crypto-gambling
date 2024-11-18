@@ -7,7 +7,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     volumes:
-      - .:/app
+      - ./logs:/logs
     ports:
       - "8000:8000"
     environment:
