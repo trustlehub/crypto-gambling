@@ -39,6 +39,7 @@ class MatchbookMarket(UnderscoreAliasModel):
     market_type: str
     volume: float
     runners: List[MatchbookRunner]
+    name: str
 
 
 class MatchbookEvent(UnderscoreAliasModel):
