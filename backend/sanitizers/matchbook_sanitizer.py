@@ -59,4 +59,4 @@ def matchbook_sanitizer(events: List[MatchbookEvent]) -> tuple[list[Event], Prov
                 
             )
         )
-        return event_list, matchbook_provider
+    return event_list, matchbook_provider
