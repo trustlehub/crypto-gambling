@@ -76,5 +76,5 @@ async def matching_and_possibilities_engine(events, db):
             )
         )
 
-        print(event1.name, event2.name)
+        print(f"Matched: {event1.name} || {event2.name} ")
     db.commit()
