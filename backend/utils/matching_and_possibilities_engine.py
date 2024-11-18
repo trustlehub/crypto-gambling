@@ -24,8 +24,12 @@ async def matching_and_possibilities_engine(events, db):
                 datetime.fromisoformat(event2.start_time) - datetime.fromisoformat(event1.start_time))
                                .total_seconds())
             if event1.providers == event2.providers:
-                lg.debug(f"{db.query(Event).options(joinedload(Event.outcomes)).filter(Event.id == event1.id).all()}")
+                lg.debug(f"{[event.outcome for event in db.query(Event).options(joinedload(Event.outcomes)).filter(Event.id == event1.id).all()]}")
+                lg.debug(f"{[event.outcome for event in db.query(Event).options(joinedload(Event.outcomes)).filter(Event.id == event2.id).all()]}")
                 lg.debug("Providers are same. Something wrong")
+                
+            lg.debug(f'{event1.providers}')
+            lg.debug(f'{event2.providers}')
 
             if time_difference == 0:
                 matches = 0
