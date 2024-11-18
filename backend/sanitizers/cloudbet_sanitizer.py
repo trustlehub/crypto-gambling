@@ -5,13 +5,14 @@ from models.cloudbet import CloudbetEvent
 
 
 def cloudbet_sanitizer(cloudbet_data: list[CloudbetEvent], db) -> tuple[list[Event], Provider]:
-    cloudbetprovider = Provider(
-        name='cloudbet',
-        is_exchange=False,
-        is_bookmaker=True
-    )
     events: list[Event] = []
     for event in cloudbet_data:
+
+        cloudbetprovider = Provider(
+            name='cloudbet',
+            is_exchange=False,
+            is_bookmaker=True
+        )
         markets = []
         for market_key, market in event.markets.root.items():
             if "moneyline" in market_key:

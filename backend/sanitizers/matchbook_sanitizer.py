@@ -6,13 +6,14 @@ from models.matchbook import MatchbookEvent
 
 
 def matchbook_sanitizer(events: List[MatchbookEvent], db) -> tuple[list[Event], Provider]:
-    matchbook_provider = Provider(
-        name='matchbook',
-        is_exchange=True,
-        is_bookmaker=False
-    )
     event_list = []
     for event in events:
+
+        matchbook_provider = Provider(
+            name='matchbook',
+            is_exchange=True,
+            is_bookmaker=False
+        )
         markets_list = []
         outcomes_list = []
         for market in event.markets:

@@ -5,16 +5,16 @@ from models.polymarket import CleanedPolymarketOdds
 
 
 def polymarket_sanitizer(polymarket_data: list[CleanedPolymarketOdds], db) -> tuple[list[Event], Provider]:
-    polymarketProvider = Provider(
-        name='polymarket',
-        is_exchange=False,
-        is_bookmaker=True
-    )
     events: list[Event] = []
     for obj in polymarket_data:
         outcomes = []
         markets = []
 
+        polymarketProvider = Provider(
+            name='polymarket',
+            is_exchange=False,
+            is_bookmaker=True
+        )
         event_has_team_names_as_outcome = True
         for index, team in enumerate(obj.outcomes):
             if team == "Over" or team == "Under" or team == "Yes" or team == "No":
