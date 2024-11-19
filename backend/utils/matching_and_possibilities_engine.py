@@ -122,63 +122,64 @@ async def matching_and_possibilities_engine(events, db):
             is_bookmaker=event2.providers[0].is_bookmaker
         )
         for market1 in event1.markets:
-            for outcome1 in market1.outcomes:
-                o = Outcome(
-                    name=outcome1.name,
-                    verbose_name=outcome1.verbose_name,
-                    is_home=outcome1.is_home,
-                    is_away=outcome1.is_away,
-                    meta=outcome1.meta,
-                    provider=provider1
-                )
-                m = Market(
-                    outcome=o,
-                    odds=market1.odds,
-                    name=market1.name,
-                    meta=market1.meta
-                )
-                outcome1_list.append(
-                    o
-                )
-                market1_list.append(
-                    m
-                )
-
-        for market2 in event2.markets:
-            for outcome2 in market2.outcomes:
-                o = Outcome(
-                    name=outcome2.name,
-                    verbose_name=outcome2.verbose_name,
-                    is_home=outcome2.is_home,
-                    is_away=outcome2.is_away,
-                    meta=outcome2.meta,
-                    provider=provider2
-                )
-                m = Market(
-                    outcome=o,
-                    odds=market2.odds,
-                    name=market2.name,
-                    meta=market2.meta
-                )
-                outcome2_list.append(
-                    o
-                )
-                market2_list.append(
-                    m
-                )
-        db.add_all(matched_outcomes)
-        db.add(
-            Event(
-                providers=[provider1, provider2],
-                name=event1.name,
-                start_time=event1.start_time,
-                meta={**(event1.meta if event1.meta is not None else {}),
-                      **(event2.meta if event2.meta is not None else {})},
-                markets=[*market1_list, market2_list],
-                outcomes=[*outcome1_list, outcome2_list],
-                last_updated=event1.last_updated,
-                matched=True
+            outcome1 = market1.outcome
+            o = Outcome(
+                name=outcome1.name,
+                verbose_name=outcome1.verbose_name,
+                is_home=outcome1.is_home,
+                is_away=outcome1.is_away,
+                meta=outcome1.meta,
+                provider=provider1
             )
-        )
+            m = Market(
+                outcome=o,
+                odds=market1.odds,
+                name=market1.name,
+                meta=market1.meta
+            )
+            outcome1_list.append(
+                o
+            )
+            market1_list.append(
+                m
+            )
 
-    db.commit()
+    for market2 in event2.markets:
+        outcome2 = market2.outcome
+        o = Outcome(
+            name=outcome2.name,
+            verbose_name=outcome2.verbose_name,
+            is_home=outcome2.is_home,
+            is_away=outcome2.is_away,
+            meta=outcome2.meta,
+            provider=provider2
+        )
+        m = Market(
+            outcome=o,
+            odds=market2.odds,
+            name=market2.name,
+            meta=market2.meta
+        )
+        outcome2_list.append(
+            o
+        )
+        market2_list.append(
+            m
+        )
+    db.add_all(matched_outcomes)
+    db.add(
+        Event(
+            providers=[provider1, provider2],
+            name=event1.name,
+            start_time=event1.start_time,
+            meta={**(event1.meta if event1.meta is not None else {}),
+                  **(event2.meta if event2.meta is not None else {})},
+            markets=[*market1_list, market2_list],
+            outcomes=[*outcome1_list, outcome2_list],
+            last_updated=event1.last_updated,
+            matched=True
+        )
+    )
+
+
+db.commit()
