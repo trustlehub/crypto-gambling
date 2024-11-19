@@ -1,7 +1,7 @@
 import json
 import logging
 
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, JSON, Float, create_engine
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, JSON, Float, create_engine, Table
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import sessionmaker
@@ -17,6 +17,12 @@ SQLALCHEMY_DATABASE_URL = "sqlite:///crypto.sqlite"  # Change this to your DB UR
 engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+matched_outcome_outcome = Table(
+    'matched_outcome_outcome',
+    Base.metadata,
+    Column('matched_outcome_id', Integer, ForeignKey('matched_outcomes.id'), primary_key=True),
+    Column('outcome_id', Integer, ForeignKey('outcomes.id'), primary_key=True)
+)
 
 class PrintableBase():
     def to_dict(self):
@@ -57,7 +63,12 @@ class Outcome(Base, PrintableBase):
 
     market = relationship("Market", uselist=False, back_populates="outcome")
 
-    matched_outcome = relationship("MatchedOutcome", back_populates="outcomes")
+    # Define the many-to-many relationship
+    matched_outcomes = relationship(
+        "MatchedOutcome",
+        secondary=matched_outcome_outcome,
+        back_populates="outcomes"
+    )
 
 class Market(Base, PrintableBase):
     __tablename__ = 'markets'
@@ -94,7 +105,12 @@ class MatchedOutcome(Base, PrintableBase):
     __tablename__ = 'matched_outcomes'
     id = Column(Integer, primary_key=True, unique=True, nullable=False, autoincrement=True)
 
-    outcomes = relationship("Outcome", back_populates="matched_outcome", cascade="all, delete-orphan")
+    # Define the many-to-many relationship
+    outcomes = relationship(
+        "Outcome",
+        secondary=matched_outcome_outcome,
+        back_populates="matched_outcomes"
+    )
 
 
 def clone_events(events: list[Event]):
