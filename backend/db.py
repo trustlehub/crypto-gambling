@@ -1,7 +1,7 @@
 import json
 import logging
 
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, JSON, Float, TIMESTAMP, create_engine
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, JSON, Float, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import sessionmaker
@@ -10,12 +10,13 @@ import log
 
 Base = declarative_base()
 
-lg = log.setup_logger("sqlalchemy.engine",'/logs/sqlalchemy.log', logging.INFO)
+lg = log.setup_logger("sqlalchemy.engine", '/logs/sqlalchemy.log', logging.INFO)
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///crypto.sqlite"  # Change this to your DB URL
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
 
 class PrintableBase():
     def to_dict(self):
@@ -23,6 +24,15 @@ class PrintableBase():
 
     def __repr__(self):
         return json.dumps(self.to_dict(), indent=4)
+
+    def copy(self):
+        data = self.to_dict()
+        final_data = {}
+        for key, value in data.items():
+            if "id" not in key:
+                final_data[key] = value
+        return final_data
+
 
 class Provider(Base, PrintableBase):
     __tablename__ = 'providers'
@@ -53,8 +63,7 @@ class Outcome(Base, PrintableBase):
     event_id = Column(Integer, ForeignKey('events.id'), nullable=False)
     event = relationship("Event", back_populates="outcomes")
 
-    market = relationship("Market",uselist=False, back_populates="outcome")
-
+    market = relationship("Market", uselist=False, back_populates="outcome")
 
     matched_outcome_id = Column(Integer, ForeignKey('matched_outcomes.id'), nullable=True)
     matched_outcome = relationship("MatchedOutcome", back_populates="outcomes")
@@ -76,7 +85,6 @@ class Market(Base, PrintableBase):
 
 class Event(Base, PrintableBase):
     __tablename__ = 'events'
-    
 
     id = Column(Integer, primary_key=True, unique=True, nullable=False, autoincrement=True)
     name = Column(String, nullable=False)
@@ -86,15 +94,14 @@ class Event(Base, PrintableBase):
     meta = Column(JSON, nullable=True)
     matched = Column(Boolean, nullable=False)
 
-    providers = relationship("Provider", back_populates="events",cascade="all, delete-orphan")
+    providers = relationship("Provider", back_populates="events", cascade="all, delete-orphan")
 
-    markets = relationship("Market", back_populates="event",cascade="all, delete-orphan")
-    outcomes = relationship("Outcome", back_populates="event",cascade="all, delete-orphan")
+    markets = relationship("Market", back_populates="event", cascade="all, delete-orphan")
+    outcomes = relationship("Outcome", back_populates="event", cascade="all, delete-orphan")
 
 
 class MatchedOutcome(Base, PrintableBase):
     __tablename__ = 'matched_outcomes'
     id = Column(Integer, primary_key=True, unique=True, nullable=False, autoincrement=True)
 
-    outcomes = relationship("Outcome", back_populates="matched_outcome",cascade="all, delete-orphan")
-    
+    outcomes = relationship("Outcome", back_populates="matched_outcome", cascade="all, delete-orphan")
