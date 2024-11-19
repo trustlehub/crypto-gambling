@@ -1,11 +1,16 @@
 import json
+import logging
 
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, JSON, Float, TIMESTAMP, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import sessionmaker
 
+import log
+
 Base = declarative_base()
+
+lg = log.setup_logger("sqlalchemy.engine",'/logs/sqlalchemy.log', logging.INFO)
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///crypto.sqlite"  # Change this to your DB URL
 

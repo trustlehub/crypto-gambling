@@ -69,13 +69,12 @@ def polymarket_sanitizer(polymarket_data: list[CleanedPolymarketOdds], db) -> tu
                 matched=False
             )
 
+            db.add(event)
+            db.commit()
             lg.info(f"Adding {event.name}...")
             lg.info(f"outcomes: {outcomes}")
             lg.info(f"providers: {polymarketProvider}")
             lg.info(f"\n" * 5)
             events.append(event)
-            db.add(event)
-            db.flush()
 
-    db.commit()
     return events, polymarketProvider

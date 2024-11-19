@@ -63,6 +63,8 @@ def matchbook_sanitizer(events: List[MatchbookEvent], db) -> tuple[list[Event], 
                 markets=markets_list,
                 matched=False,
             )
+            db.add(event)
+            db.commit()
             lg.info(f"Adding {event.name}...")
             lg.info(f"outcomes: {outcomes_list}")
             lg.info(f"providers: {matchbook_provider}")
@@ -70,8 +72,5 @@ def matchbook_sanitizer(events: List[MatchbookEvent], db) -> tuple[list[Event], 
             event_list.append(
                 event
             )
-            db.add(event)
-            db.flush()
 
-    db.commit()
     return event_list, matchbook_provider
