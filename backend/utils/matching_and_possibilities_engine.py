@@ -54,6 +54,7 @@ async def matching_and_possibilities_engine(events, db):
 
     for event1, event2 in matched_events:
 
+        lg.info(f" Matching {event1.name, event1.providers} || {event2.name, event2.providers} ...")
         matched_outcomes = []
         for o1 in event1.outcomes:
             # select the each outcome from event 1, match with all outcomes from event 2
@@ -68,13 +69,15 @@ async def matching_and_possibilities_engine(events, db):
                     got_a_match = True
                     mo.outcomes.append(o2)
                     lg.info(
-                        f"Matched outcomes:: {o1.name, o1.provider.name} || {o2.name, o2.provider.name} || {similarity} \n"
-                        f" for matched events:: {event1.name, event1.providers} || {event2.name, event2.providers}")
+                        f"Matched outcomes:: {o1.name, o1.provider.name} || {similarity} \n")
                     matched_outcomes.append(mo)
+                else:
+                    lg.info(
+                        f"Couldn't match outcomes:: {o1.name, o1.provider.name} || {o2.name, o2.provider.name} || {similarity} \n")
+
             if not got_a_match:
                 lg.warn(
-                    f"Could't match an outcome to {o1.name, o1.provider.name} \n"
-                    f" for matched events:: {event1.name, event1.providers} || {event2.name, event2.providers}")
+                    f"Couldn't find an outcome to {o1.name, o1.provider.name} \n")
 
         db.add_all(matched_outcomes)
         db.add(
