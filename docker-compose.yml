@@ -8,6 +8,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./logs:/logs
+      - ./db:/db
     ports:
       - "8000:8000"
     environment:
