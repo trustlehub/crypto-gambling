@@ -90,7 +90,7 @@ async def matching_and_possibilities_engine(events, db):
             tried_outcomes = []
             for o2 in event2.outcomes:
                 similarity = fuzz.ratio(o1.name.lower(), o2.name.lower())
-                threshold = 50
+                threshold = 40
                 if similarity > threshold:
                     got_a_match = True
                     mo.outcomes.append(o2)
