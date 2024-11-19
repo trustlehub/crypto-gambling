@@ -5,7 +5,7 @@ from itertools import product
 from fuzzywuzzy import fuzz
 from sqlalchemy.orm import joinedload
 
-from db import Event, MatchedOutcome, Provider, Outcome, Market
+from db import Event, MatchedOutcome, Provider
 from log import setup_logger
 
 lg = setup_logger('matching_and_possibilities_engine', '/logs/matching.log', logging.DEBUG)
@@ -110,16 +110,15 @@ async def matching_and_possibilities_engine(events, db):
         db.add_all(matched_outcomes)
         db.add(
             Event(
-                providers=[*[Provider(provider.copy()) for provider in event1.providers],
-                           *[Provider(provider.copy()) for provider in event2.providers]],
+                providers=[*[provider.copy() for provider in event1.providers],
+                           *[provider.copy() for provider in event2.providers]],
                 name=event1.name,
                 start_time=event1.start_time,
                 meta={**(event1.meta if event1.meta is not None else {}),
                       **(event2.meta if event2.meta is not None else {})},
-                markets=[*[Market(market.copy()) for market in event1.markets],
-                         *[Market(market.copy()) for market in event2.markets]],
-                outcomes=[*[Outcome(outcome.copy()) for outcome in event1.outcomes],
-                          *[Outcome(outcome.copy()) for outcome in event2.outcomes]],
+                markets=[*[market.copy() for market in event1.markets], *[market.copy() for market in event2.markets]],
+                outcomes=[*[outcome.copy() for outcome in event1.outcomes],
+                          *[outcome.copy() for outcome in event2.outcomes]],
                 last_updated=event1.last_updated,
                 matched=True
             )

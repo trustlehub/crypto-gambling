@@ -24,15 +24,7 @@ class PrintableBase():
 
     def __repr__(self):
         return json.dumps(self.to_dict(), indent=4)
-
-    def copy(self):
-        data = self.to_dict()
-        final_data = {}
-        for key, value in data.items():
-            if "id" not in key:
-                final_data[key] = value
-        return final_data
-
+    
 
 class Provider(Base, PrintableBase):
     __tablename__ = 'providers'
@@ -45,6 +37,14 @@ class Provider(Base, PrintableBase):
 
     event_id = Column(Integer, ForeignKey('events.id'), nullable=False)
     events = relationship("Event", back_populates="providers")
+    
+    def copy(self):
+        return Provider(
+            name=self.name,
+            is_exchange=self.is_exchange,
+            is_bookmaker=self.is_bookmaker,
+            meta=self.meta,
+        )
 
 
 class Outcome(Base, PrintableBase):
@@ -68,6 +68,14 @@ class Outcome(Base, PrintableBase):
     matched_outcome_id = Column(Integer, ForeignKey('matched_outcomes.id'), nullable=True)
     matched_outcome = relationship("MatchedOutcome", back_populates="outcomes")
 
+    def copy(self):
+        return Outcome(
+            name=self.name,
+            verbose_name=self.verbose_name,
+            is_home=self.is_home,
+            is_away=self.is_away,
+            meta=self.meta,
+        )
 
 class Market(Base, PrintableBase):
     __tablename__ = 'markets'
@@ -82,6 +90,12 @@ class Market(Base, PrintableBase):
     outcome = relationship("Outcome", back_populates="market")
     event = relationship("Event", back_populates="markets")
 
+    def copy(self):
+        return Market(
+            name=self.name,
+            meta=self.meta,
+            odds=self.odds,
+        )
 
 class Event(Base, PrintableBase):
     __tablename__ = 'events'
@@ -99,9 +113,19 @@ class Event(Base, PrintableBase):
     markets = relationship("Market", back_populates="event", cascade="all, delete-orphan")
     outcomes = relationship("Outcome", back_populates="event", cascade="all, delete-orphan")
 
+    def copy(self):
+        return Event(
+            name=self.name,
+            meta=self.meta,
+            last_updated=self.last_updated,
+            matched=self.matched,
+            start_time=self.start_time,
+            competition=self.competition,
+        )
 
 class MatchedOutcome(Base, PrintableBase):
     __tablename__ = 'matched_outcomes'
     id = Column(Integer, primary_key=True, unique=True, nullable=False, autoincrement=True)
 
     outcomes = relationship("Outcome", back_populates="matched_outcome", cascade="all, delete-orphan")
+    
