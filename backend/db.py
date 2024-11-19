@@ -57,9 +57,7 @@ class Outcome(Base, PrintableBase):
 
     market = relationship("Market", uselist=False, back_populates="outcome")
 
-    matched_outcome_id = Column(Integer, ForeignKey('matched_outcomes.id'), nullable=True)
     matched_outcome = relationship("MatchedOutcome", back_populates="outcomes")
-
 
 class Market(Base, PrintableBase):
     __tablename__ = 'markets'
