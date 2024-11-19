@@ -1,13 +1,14 @@
 import logging
 from datetime import datetime
 from itertools import combinations, product
-from sqlalchemy.orm import joinedload
+
 from fuzzywuzzy import fuzz
 
 from db import Event, MatchedOutcome
 from log import setup_logger
 
 lg = setup_logger('matching_and_possibilities_engine', '/logs/matching.log', logging.DEBUG)
+
 
 async def matching_and_possibilities_engine(events, db):
     matched_events: list[tuple[Event, Event]] = []
@@ -25,14 +26,6 @@ async def matching_and_possibilities_engine(events, db):
             time_difference = (abs(
                 datetime.fromisoformat(event2.start_time) - datetime.fromisoformat(event1.start_time))
                                .total_seconds())
-            if event1.providers == event2.providers:
-                lg.debug(f"{[event.providers for event in db.query(Event).options(joinedload(Event.providers)).filter(Event.id == event1.id).all()]}")
-                lg.debug(f"{[event.providers for event in db.query(Event).options(joinedload(Event.providers)).filter(Event.id == event2.id).all()]}")
-                lg.debug("Providers are same. Something wrong")
-                
-            lg.debug(f'{event1.providers}')
-            lg.debug(f'{event2.providers}')
-
             if time_difference == 0:
                 matches = 0
 
@@ -72,6 +65,8 @@ async def matching_and_possibilities_engine(events, db):
                 threshold = 50
                 if similarity > threshold:
                     mo.outcomes.append(o2)
+                    lg.info(
+                        f"Matched outcomes:: {o1} || {o2} || {similarity} \n for matched events:: {event1} || {event2}")
                     matched_outcomes.append(mo)
 
         db.add_all(matched_outcomes)
@@ -89,5 +84,4 @@ async def matching_and_possibilities_engine(events, db):
             )
         )
 
-        lg.debug(f"Matched: {event1.name} || {event2.name} ")
     db.commit()
