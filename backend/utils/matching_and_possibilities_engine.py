@@ -5,7 +5,7 @@ from itertools import product
 from fuzzywuzzy import fuzz
 from sqlalchemy.orm import joinedload
 
-from db import Event, MatchedOutcome, Provider, Outcome, Market
+from db import Event, MatchedOutcome, Provider, clone_events
 from log import setup_logger
 
 lg = setup_logger('matching_and_possibilities_engine', '/logs/matching.log', logging.DEBUG)
@@ -63,7 +63,11 @@ async def matching_and_possibilities_engine(events, db):
                     break
 
             if matches >= 2:
-                matched_events.append((event2, event1))
+                # We need to clone the events along with all the related objects
+                # so that we can save them in the database. otherwise existing objects
+                # will be updated
+                (cloned_1, cloned_2) = clone_events([event1, event2])
+                matched_events.append((cloned_1, cloned_2))
             lg.debug("\n" * 3)
         else:
             lg.debug(f"Didn't match events because of time mismatch. time diff: {time_difference} ")
@@ -78,6 +82,7 @@ async def matching_and_possibilities_engine(events, db):
         matched_outcomes = []
         for o1 in event1.outcomes:
             # select the each outcome from event 1, match with all outcomes from event 2
+
             mo = MatchedOutcome(
                 outcomes=[o1]
             )
@@ -107,79 +112,19 @@ async def matching_and_possibilities_engine(events, db):
 
             lg.info("=" * 20 + "\n" * 3)
 
-        outcome1_list = []
-        market1_list = []
-        outcome2_list = []
-        market2_list = []
-        provider1 = Provider(
-            name=event1.providers[0].name,
-            is_exchange=event1.providers[0].is_exchange,
-            is_bookmaker=event1.providers[0].is_bookmaker
-        )
-        provider2 = Provider(
-            name=event2.providers[0].name,
-            is_exchange=event2.providers[0].is_exchange,
-            is_bookmaker=event2.providers[0].is_bookmaker
-        )
-        for market1 in event1.markets:
-            outcome1 = market1.outcome
-            o = Outcome(
-                name=outcome1.name,
-                verbose_name=outcome1.verbose_name,
-                is_home=outcome1.is_home,
-                is_away=outcome1.is_away,
-                meta=outcome1.meta,
-                provider=provider1
-            )
-            m = Market(
-                outcome=o,
-                odds=market1.odds,
-                name=market1.name,
-                meta=market1.meta
-            )
-            outcome1_list.append(
-                o
-            )
-            market1_list.append(
-                m
-            )
-
-    for market2 in event2.markets:
-        outcome2 = market2.outcome
-        o = Outcome(
-            name=outcome2.name,
-            verbose_name=outcome2.verbose_name,
-            is_home=outcome2.is_home,
-            is_away=outcome2.is_away,
-            meta=outcome2.meta,
-            provider=provider2
-        )
-        m = Market(
-            outcome=o,
-            odds=market2.odds,
-            name=market2.name,
-            meta=market2.meta
-        )
-        outcome2_list.append(
-            o
-        )
-        market2_list.append(
-            m
-        )
     db.add_all(matched_outcomes)
     db.add(
         Event(
-            providers=[provider1, provider2],
+            providers=[*event1.providers, *event2.providers],
             name=event1.name,
             start_time=event1.start_time,
             meta={**(event1.meta if event1.meta is not None else {}),
                   **(event2.meta if event2.meta is not None else {})},
-            markets=[*market1_list, *market2_list],
-            outcomes=[*outcome1_list, *outcome2_list],
+            markets=[*event1.markets, *event2.markets],
+            outcomes=[*event1.outcomes, *event2.outcomes],
             last_updated=event1.last_updated,
             matched=True
         )
     )
-
 
     db.commit()

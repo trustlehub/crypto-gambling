@@ -24,7 +24,7 @@ class PrintableBase():
 
     def __repr__(self):
         return json.dumps(self.to_dict(), indent=4)
-    
+
 
 class Provider(Base, PrintableBase):
     __tablename__ = 'providers'
@@ -97,3 +97,52 @@ class MatchedOutcome(Base, PrintableBase):
     id = Column(Integer, primary_key=True, unique=True, nullable=False, autoincrement=True)
 
     outcomes = relationship("Outcome", back_populates="matched_outcome", cascade="all, delete-orphan")
+
+
+def clone_events(events: list[Event]):
+    cloned_events = []
+    for event in events:
+        outcome_list = []
+        market_list = []
+        provider = Provider(
+            name=event.providers[0].name,
+            is_exchange=event.providers[0].is_exchange,
+            is_bookmaker=event.providers[0].is_bookmaker
+        )
+        for market in event.markets:
+            outcome = market.outcome
+            o = Outcome(
+                name=outcome.name,
+                verbose_name=outcome.verbose_name,
+                is_home=outcome.is_home,
+                is_away=outcome.is_away,
+                meta=outcome.meta,
+                provider=provider
+            )
+            m = Market(
+                outcome=o,
+                odds=market.odds,
+                name=market.name,
+                meta=market.meta
+            )
+            outcome_list.append(
+                o
+            )
+            market_list.append(
+                m
+            )
+
+        cloned_events.append(
+            Event(
+                name=event.name,
+                start_time=event.start_time,
+                last_updated=event.last_updated,
+                competition=event.competition,
+                meta=event.meta,
+                matched=event.matched,
+                providers=[provider],
+                outcomes=outcome_list,
+                markets=market_list
+            )
+        )
+    return cloned_events
