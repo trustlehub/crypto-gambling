@@ -5,7 +5,7 @@ from itertools import product
 from fuzzywuzzy import fuzz
 from sqlalchemy.orm import joinedload
 
-from db import Event, MatchedOutcome, Provider
+from db import Event, MatchedOutcome, Provider, Market, Outcome
 from log import setup_logger
 
 lg = setup_logger('matching_and_possibilities_engine', '/logs/matching.log', logging.DEBUG)
@@ -107,18 +107,61 @@ async def matching_and_possibilities_engine(events, db):
 
             lg.info("=" * 20 + "\n" * 3)
 
+        providers_1 = [Provider(
+            name=provider.name,
+            is_exchange=provider.is_exchange,
+            is_bookmaker=provider.is_bookmaker,
+        ) for provider in event1.providers]
+        
+        providers_2 = [Provider(
+            name=provider.name,
+            is_exchange=provider.is_exchange,
+            is_bookmaker=provider.is_bookmaker,
+        ) for provider in event2.providers]
+
+        market_1 = [Market(
+            outcome=market.outcome,
+            odds=market.odds,
+            name=market.name,
+            meta=market.meta
+        ) for market in event1.markets]
+
+        market_2 = [Market(
+            outcome=market.outcome,
+            odds=market.odds,
+            name=market.name,
+            meta=market.meta
+        ) for market in event2.markets]
+
+        outcome_1 = [Outcome(
+            name=outcome.name,
+            verbose_name=outcome.verbose_name,
+            is_home=outcome.is_home,
+            is_away=outcome.is_away,
+            meta=outcome.meta,
+            provider=providers_1[0]
+        ) for outcome in event1.outcomes]
+
+        outcome_2 = [Outcome(
+            name=outcome.name,
+            verbose_name=outcome.verbose_name,
+            is_home=outcome.is_home,
+            is_away=outcome.is_away,
+            meta=outcome.meta,
+            provider=providers_2[0]
+        ) for outcome in event2.outcomes]
+
         db.add_all(matched_outcomes)
         db.add(
             Event(
-                providers=[*[provider.copy() for provider in event1.providers],
-                           *[provider.copy() for provider in event2.providers]],
+                providers=[*providers_1,
+                           *providers_2],
                 name=event1.name,
                 start_time=event1.start_time,
                 meta={**(event1.meta if event1.meta is not None else {}),
                       **(event2.meta if event2.meta is not None else {})},
-                markets=[*[market.copy() for market in event1.markets], *[market.copy() for market in event2.markets]],
-                outcomes=[*[outcome.copy() for outcome in event1.outcomes],
-                          *[outcome.copy() for outcome in event2.outcomes]],
+                markets=[*market_1, *market_2],
+                outcomes=[*outcome_1, *outcome_2],
                 last_updated=event1.last_updated,
                 matched=True
             )
