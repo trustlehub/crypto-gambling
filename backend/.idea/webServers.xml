@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="63678898-3769-4740-a9c3-13bf3de94cb5" name="london">
+        <fileTransfer rootFolder="/root/crypto-gambling/backend" accessType="SFTP" host="209.250.228.247" port="22" sshConfigId="2f91ff21-44af-4f29-8088-b867f578c35e" sshConfig="root@209.250.228.247:22 key" keyPair="true">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
