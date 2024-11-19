@@ -81,8 +81,9 @@ def cloudbet_sanitizer(cloudbet_data: list[CloudbetEvent], db) -> tuple[list[Eve
                     markets=markets,
                     matched=False,
                 )
+                db.add(e)
+                db.flush()
                 events.append(e)
                 break
-    db.add_all(events)
     db.commit()
     return events, cloudbetprovider

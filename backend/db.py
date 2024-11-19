@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 
 Base = declarative_base()
 
-SQLALCHEMY_DATABASE_URL = "sqlite:////db/crypto.sqlite"  # Change this to your DB URL
+SQLALCHEMY_DATABASE_URL = "sqlite:///crypto.sqlite"  # Change this to your DB URL
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
