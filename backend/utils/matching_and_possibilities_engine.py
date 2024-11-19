@@ -5,7 +5,7 @@ from itertools import product
 from fuzzywuzzy import fuzz
 from sqlalchemy.orm import joinedload
 
-from db import Event, MatchedOutcome, Provider, Market, Outcome
+from db import Event, MatchedOutcome, Provider, Outcome, Market
 from log import setup_logger
 
 lg = setup_logger('matching_and_possibilities_engine', '/logs/matching.log', logging.DEBUG)
@@ -107,61 +107,75 @@ async def matching_and_possibilities_engine(events, db):
 
             lg.info("=" * 20 + "\n" * 3)
 
-        providers_1 = [Provider(
-            name=provider.name,
-            is_exchange=provider.is_exchange,
-            is_bookmaker=provider.is_bookmaker,
-        ) for provider in event1.providers]
-        
-        providers_2 = [Provider(
-            name=provider.name,
-            is_exchange=provider.is_exchange,
-            is_bookmaker=provider.is_bookmaker,
-        ) for provider in event2.providers]
+        outcome1_list = []
+        market1_list = []
+        outcome2_list = []
+        market2_list = []
+        provider1 = Provider(
+            name=event1.providers[0].name,
+            is_exchange=event1.providers[0].is_exchange,
+            is_bookmaker=event1.providers[0].is_bookmaker
+        )
+        provider2 = Provider(
+            name=event2.providers[0].name,
+            is_exchange=event2.providers[0].is_exchange,
+            is_bookmaker=event2.providers[0].is_bookmaker
+        )
+        for market1 in event1.markets:
+            for outcome1 in market1.outcomes:
+                o = Outcome(
+                    name=outcome1.name,
+                    verbose_name=outcome1.verbose_name,
+                    is_home=outcome1.is_home,
+                    is_away=outcome1.is_away,
+                    meta=outcome1.meta,
+                    provider=provider1
+                )
+                m = Market(
+                    outcome=o,
+                    odds=market1.odds,
+                    name=market1.name,
+                    meta=market1.meta
+                )
+                outcome1_list.append(
+                    o
+                )
+                market1_list.append(
+                    m
+                )
 
-        market_1 = [Market(
-            outcome=market.outcome,
-            odds=market.odds,
-            name=market.name,
-            meta=market.meta
-        ) for market in event1.markets]
-
-        market_2 = [Market(
-            outcome=market.outcome,
-            odds=market.odds,
-            name=market.name,
-            meta=market.meta
-        ) for market in event2.markets]
-
-        outcome_1 = [Outcome(
-            name=outcome.name,
-            verbose_name=outcome.verbose_name,
-            is_home=outcome.is_home,
-            is_away=outcome.is_away,
-            meta=outcome.meta,
-            provider=providers_1[0]
-        ) for outcome in event1.outcomes]
-
-        outcome_2 = [Outcome(
-            name=outcome.name,
-            verbose_name=outcome.verbose_name,
-            is_home=outcome.is_home,
-            is_away=outcome.is_away,
-            meta=outcome.meta,
-            provider=providers_2[0]
-        ) for outcome in event2.outcomes]
-
+        for market2 in event2.markets:
+            for outcome2 in market2.outcomes:
+                o = Outcome(
+                    name=outcome2.name,
+                    verbose_name=outcome2.verbose_name,
+                    is_home=outcome2.is_home,
+                    is_away=outcome2.is_away,
+                    meta=outcome2.meta,
+                    provider=provider2
+                )
+                m = Market(
+                    outcome=o,
+                    odds=market2.odds,
+                    name=market2.name,
+                    meta=market2.meta
+                )
+                outcome2_list.append(
+                    o
+                )
+                market2_list.append(
+                    m
+                )
         db.add_all(matched_outcomes)
         db.add(
             Event(
-                providers=[*providers_1,
-                           *providers_2],
+                providers=[provider1, provider2],
                 name=event1.name,
                 start_time=event1.start_time,
                 meta={**(event1.meta if event1.meta is not None else {}),
                       **(event2.meta if event2.meta is not None else {})},
-                markets=[*market_1, *market_2],
-                outcomes=[*outcome_1, *outcome_2],
+                markets=[*market1_list, market2_list],
+                outcomes=[*outcome1_list, outcome2_list],
                 last_updated=event1.last_updated,
                 matched=True
             )
