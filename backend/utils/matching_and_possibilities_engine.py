@@ -14,17 +14,17 @@ lg = setup_logger('matching_and_possibilities_engine', '/logs/matching.log', log
 async def matching_and_possibilities_engine(events, db):
     matched_events: list[tuple[Event, Event]] = []
     sources = [
-        *db.query(Event).join(Provider).filter(Event.matched == False, Provider.name == 'matchbook').options(
+        db.query(Event).join(Provider).filter(Event.matched == False, Provider.name == 'matchbook').options(
             joinedload(Event.outcomes),
             joinedload(Event.providers),
             joinedload(Event.markets), )
         .all(),
-        *db.query(Event).join(Provider).filter(Event.matched == False, Provider.name == 'cloudbet').options(
+        db.query(Event).join(Provider).filter(Event.matched == False, Provider.name == 'cloudbet').options(
             joinedload(Event.outcomes),
             joinedload(Event.providers),
             joinedload(Event.markets), )
         .all(),
-        *db.query(Event).join(Provider).filter(Event.matched == False, Provider.name == 'polymarket').options(
+        db.query(Event).join(Provider).filter(Event.matched == False, Provider.name == 'polymarket').options(
             joinedload(Event.outcomes),
             joinedload(Event.providers),
             joinedload(Event.markets), )
