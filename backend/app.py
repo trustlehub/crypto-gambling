@@ -28,7 +28,7 @@ from utils.matching_and_possibilities_engine import matching_and_possibilities_e
 
 load_dotenv()
 
-lg = setup_logger("app", "app.log", logging.DEBUG)
+lg = setup_logger("app", "/logs/app.log", logging.DEBUG)
 # Creating the instance with base URL and API key
 cloudbet_api = CloudbetApiInstance({
     'baseURL': 'https://sports-api.cloudbet.com/pub',
