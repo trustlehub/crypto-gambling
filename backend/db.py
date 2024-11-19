@@ -121,7 +121,8 @@ def clone_events(events: list[Event]):
         provider = Provider(
             name=event.providers[0].name,
             is_exchange=event.providers[0].is_exchange,
-            is_bookmaker=event.providers[0].is_bookmaker
+            is_bookmaker=event.providers[0].is_bookmaker,
+            meta=event.providers[0].meta
         )
         for market in event.markets:
             outcome = market.outcome
