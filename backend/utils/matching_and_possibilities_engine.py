@@ -55,6 +55,7 @@ async def matching_and_possibilities_engine(events, db):
     for event1, event2 in matched_events:
 
         lg.info(f" Matching {event1.name, event1.providers} || {event2.name, event2.providers} ...")
+        lg.info(f" even1 outcomes: {len(event1.outcomes)}, even2 outcomes: {len(event2.outcomes)}")
         matched_outcomes = []
         for o1 in event1.outcomes:
             # select the each outcome from event 1, match with all outcomes from event 2
