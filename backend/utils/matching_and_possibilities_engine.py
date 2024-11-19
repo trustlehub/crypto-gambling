@@ -3,8 +3,9 @@ from datetime import datetime
 from itertools import combinations, product
 
 from fuzzywuzzy import fuzz
+from sqlalchemy.orm import joinedload
 
-from db import Event, MatchedOutcome
+from db import Event, MatchedOutcome, Provider
 from log import setup_logger
 
 lg = setup_logger('matching_and_possibilities_engine', '/logs/matching.log', logging.DEBUG)
@@ -12,7 +13,23 @@ lg = setup_logger('matching_and_possibilities_engine', '/logs/matching.log', log
 
 async def matching_and_possibilities_engine(events, db):
     matched_events: list[tuple[Event, Event]] = []
-    sources = [*events]
+    sources = [
+        *db.query(Event).join(Provider).filter(Event.matched == False, Provider.name == 'matchbook').options(
+            joinedload(Event.outcomes),
+            joinedload(Event.providers),
+            joinedload(Event.markets), )
+        .all(),
+        *db.query(Event).join(Provider).filter(Event.matched == False, Provider.name == 'cloudbet').options(
+            joinedload(Event.outcomes),
+            joinedload(Event.providers),
+            joinedload(Event.markets), )
+        .all(),
+        *db.query(Event).join(Provider).filter(Event.matched == False, Provider.name == 'polymarket').options(
+            joinedload(Event.outcomes),
+            joinedload(Event.providers),
+            joinedload(Event.markets), )
+        .all(),
+    ]
     # Matching engine + possibilities engine
 
     # Get combinations of 2 event lists from the list of sources. This ensures 
@@ -85,6 +102,8 @@ async def matching_and_possibilities_engine(events, db):
                     f"Couldn't find an outcome to {o1.name, o1.provider.name} \n")
                 lg.warn(
                     f"tried: {tried_outcomes}")
+
+            lg.info("=" * 20 + "\n" * 3)
 
         db.add_all(matched_outcomes)
         db.add(
