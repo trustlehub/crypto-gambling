@@ -182,4 +182,4 @@ async def matching_and_possibilities_engine(events, db):
     )
 
 
-db.commit()
+    db.commit()
