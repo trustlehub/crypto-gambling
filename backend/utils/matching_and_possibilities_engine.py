@@ -95,7 +95,8 @@ async def matching_and_possibilities_engine(events, db):
                     got_a_match = True
                     mo.outcomes.append(o2)
                     lg.info(
-                        f"Matched outcomes:: {o1.name, o1.provider.name} || {similarity} \n")
+                        f"Matched outcomes:: {o1.name, o1.provider.name} || "
+                        f"{o2.name, o2.provider.name} || {similarity} \n")
                     matched_outcomes.append(mo)
                 else:
                     lg.info(
@@ -113,6 +114,7 @@ async def matching_and_possibilities_engine(events, db):
             lg.info("=" * 20 + "\n" * 3)
 
     db.add_all(matched_outcomes)
+    lg.info("Matched outcomes added to db")
     db.add(
         Event(
             providers=[*event1.providers, *event2.providers],
