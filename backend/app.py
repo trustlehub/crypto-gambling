@@ -131,7 +131,7 @@ async def get_events(db: Session = Depends(get_db)):
         for o1, o2 in permutations(outcomes, 2):
             # Matched outcomes are the same outcomes from different providers
             # so we want the non matched ones
-            all_outcomes_matched_with_o2 = [mo.outcome for mo in o2.matched_outcomes]
+            all_outcomes_matched_with_o2 = [*(mo.outcomes for mo in o2.matched_outcomes)]
             if o2 in all_outcomes_matched_with_o2:
                 lg.info("skipping this combination: same team")
                 continue
