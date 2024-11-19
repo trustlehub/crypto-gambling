@@ -1,11 +1,13 @@
+import logging
 from datetime import datetime
 from itertools import combinations, product
 from sqlalchemy.orm import joinedload
 from fuzzywuzzy import fuzz
 
 from db import Event, MatchedOutcome
-import logging as lg
+from log import setup_logger
 
+lg = setup_logger('matching_and_possibilities_engine', 'matching.log', logging.DEBUG)
 
 async def matching_and_possibilities_engine(events, db):
     matched_events: list[tuple[Event, Event]] = []

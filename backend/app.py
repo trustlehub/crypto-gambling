@@ -1,3 +1,4 @@
+import logging
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from itertools import permutations
@@ -12,6 +13,7 @@ from apis.cloudbet import CloudbetApiInstance
 from apis.matchbook import MatchbookApiInstance
 from apis.polymarket import PolymarketApiInstance
 from db import SessionLocal, Base, engine, Outcome, Event
+from log import setup_logger
 from models.frontend import OddsCleaned
 from sanitizers.cloudbet_sanitizer import cloudbet_sanitizer
 from sanitizers.matchbook_sanitizer import matchbook_sanitizer
@@ -26,9 +28,7 @@ from utils.matching_and_possibilities_engine import matching_and_possibilities_e
 
 load_dotenv()
 
-import logging as lg
-lg.basicConfig(level=lg.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p',filename='/logs/app.log' )
-
+lg = setup_logger("app", "app.log", logging.DEBUG)
 # Creating the instance with base URL and API key
 cloudbet_api = CloudbetApiInstance({
     'baseURL': 'https://sports-api.cloudbet.com/pub',
