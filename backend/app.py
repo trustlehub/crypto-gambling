@@ -171,20 +171,14 @@ async def get_events(db: Session = Depends(get_db)):
                         lay_outcome_id=o2.id,
                         meta={
                             o1.provider.name: {
-                                **(o1.meta[o1.provider.name] if o1.meta is not None and hasattr(o1.meta,
-                                                                                                o1.provider.name) else {}),
-                                **(o1.market.meta[o1.provider.name] if o1.market.meta is not None and hasattr(
-                                    o1.market.meta, o1.provider.name) else {}),
-                                **(o1.event.meta[o1.provider.name] if o1.event.meta is not None and hasattr(
-                                    o1.event.meta, o1.provider.name) else {}),
+                                **(o1.meta[o1.provider.name] if o1.meta is not None else {}),
+                                **(o1.market.meta[o1.provider.name] if o1.market.meta is not None else {}),
+                                **(o1.event.meta[o1.provider.name] if o1.event.meta is not None else {}),
                             },
                             o2.provider.name: {
-                                **(o2.meta[o2.provider.name] if o2.meta is not None and hasattr(o2.meta,
-                                                                                                o2.provider.name) else {}),
-                                **(o2.market.meta[o2.provider.name] if o2.market.meta is not None and hasattr(
-                                    o2.market.meta, o2.provider.name) else {}),
-                                **(o2.event.meta[o2.provider.name] if o2.event.meta is not None and hasattr(
-                                    o2.event.meta, o2.provider.name) else {}),
+                                **(o2.meta[o2.provider.name] if o2.meta is not None else {}),
+                                **(o2.market.meta[o2.provider.name] if o2.market.meta is not None else {}),
+                                **(o2.event.meta[o2.provider.name] if o2.event.meta is not None else {}),
                             }
                         },
                     )
