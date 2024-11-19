@@ -1,19 +1,15 @@
-import logging as lg
 from datetime import datetime
 from itertools import combinations, product
-
-from fuzzywuzzy import fuzz
 from sqlalchemy.orm import joinedload
+from fuzzywuzzy import fuzz
 
-from db import Event, MatchedOutcome, Provider
+from db import Event, MatchedOutcome
+import logging as lg
 
 
 async def matching_and_possibilities_engine(events, db):
     matched_events: list[tuple[Event, Event]] = []
-    sources = [db.query(Event).join(Provider).filter(Event.matched == False, Provider.name == 'matchbook').all(),
-               db.query(Event).join(Provider).filter(Event.matched == False, Provider.name == 'cloudbet').all(),
-               db.query(Event).join(Provider).filter(Event.matched == False, Provider.name == 'polymarket').all(),
-               ]
+    sources = [*events]
     # Matching engine + possibilities engine
 
     # Get combinations of 2 event lists from the list of sources. This ensures 
@@ -28,12 +24,10 @@ async def matching_and_possibilities_engine(events, db):
                 datetime.fromisoformat(event2.start_time) - datetime.fromisoformat(event1.start_time))
                                .total_seconds())
             if event1.providers == event2.providers:
-                lg.debug(
-                    f"{[event.providers for event in db.query(Event).options(joinedload(Event.providers)).filter(Event.id == event1.id).all()]}")
-                lg.debug(
-                    f"{[event.providers for event in db.query(Event).options(joinedload(Event.providers)).filter(Event.id == event2.id).all()]}")
+                lg.debug(f"{[event.providers for event in db.query(Event).options(joinedload(Event.providers)).filter(Event.id == event1.id).all()]}")
+                lg.debug(f"{[event.providers for event in db.query(Event).options(joinedload(Event.providers)).filter(Event.id == event2.id).all()]}")
                 lg.debug("Providers are same. Something wrong")
-
+                
             lg.debug(f'{event1.providers}')
             lg.debug(f'{event2.providers}')
 
@@ -67,6 +61,7 @@ async def matching_and_possibilities_engine(events, db):
 
         matched_outcomes = []
         for o1 in event1.outcomes:
+            # select the each outcome from event 1, match with all outcomes from event 2
             mo = MatchedOutcome(
                 outcomes=[o1]
             )
