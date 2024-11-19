@@ -135,7 +135,7 @@ async def get_events(db: Session = Depends(get_db)):
             # If o1 is not bookmaker or o2 is not exchange, then we can't match them
             if not o1.provider.is_bookmaker or not o2.provider.is_exchange:
                 continue
-               
+
             all_outcomes_matched_with_o1 = [*(mo.outcomes for mo in o1.matched_outcomes)]
             if o2 in all_outcomes_matched_with_o1:
                 lg.info("skipping this combination: same team")
@@ -171,14 +171,20 @@ async def get_events(db: Session = Depends(get_db)):
                         lay_outcome_id=o2.id,
                         meta={
                             o1.provider.name: {
-                                **(o1.meta[o1.provider.name] if o1.meta is not None else {}),
-                                **(o1.market.meta[o1.provider.name] if o1.market.meta is not None else {}),
-                                **(o1.event.meta[o1.provider.name] if o1.event.meta is not None else {}),
+                                **(o1.meta[
+                                       o1.provider.name] if o1.meta is not None and o1.provider.name in o1.meta.keys() else {}),
+                                **(o2.market.meta[
+                                       o2.provider.name] if o2.market.meta is not None and o2.provider.name in o2.market.meta.keys() else {}),
+                                **(o2.event.meta[
+                                       o2.provider.name] if o2.event.meta is not None and o2.provider.name in o2.event.meta.keys() else {}),
                             },
                             o2.provider.name: {
-                                **(o2.meta[o2.provider.name] if o2.meta is not None else {}),
-                                **(o2.market.meta[o2.provider.name] if o2.market.meta is not None else {}),
-                                **(o2.event.meta[o2.provider.name] if o2.event.meta is not None else {}),
+                                **(o2.meta[
+                                       o2.provider.name] if o2.meta is not None and o2.provider.name in o2.meta.keys() else {}),
+                                **(o2.market.meta[
+                                       o2.provider.name] if o2.market.meta is not None and o2.provider.name in o2.market.meta.keys() else {}),
+                                **(o2.event.meta[
+                                       o2.provider.name] if o2.event.meta is not None and o2.provider.name in o2.event.meta.keys() else {}),
                             }
                         },
                     )
