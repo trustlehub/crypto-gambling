@@ -1,10 +1,13 @@
+import logging
 from datetime import datetime, timezone
 from typing import List
 
 from db import Market, Outcome, Event, Provider
+from log import setup_logger
 from models.matchbook import MatchbookEvent
 
 
+lg = setup_logger("matchbook_sanitizer",'/logs/matchbook_sanitizer.log', logging.DEBUG )
 def matchbook_sanitizer(events: List[MatchbookEvent], db) -> tuple[list[Event], Provider]:
     event_list = []
     for event in events:
@@ -59,8 +62,11 @@ def matchbook_sanitizer(events: List[MatchbookEvent], db) -> tuple[list[Event], 
                 outcomes=outcomes_list,
                 markets=markets_list,
                 matched=False,
-
             )
+            lg.info(f"Adding {event.name}...")
+            lg.info(f"outcomes: {outcomes_list}")
+            lg.info(f"providers: {matchbook_provider}")
+            lg.info(f"\n"*5)
             event_list.append(
                 event
             )

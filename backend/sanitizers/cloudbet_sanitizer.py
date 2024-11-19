@@ -1,9 +1,11 @@
+import logging
 from datetime import datetime, timezone
 
 from db import Provider, Market, Event, Outcome
+from log import setup_logger
 from models.cloudbet import CloudbetEvent
 
-
+lg = setup_logger("cloudbet_sanitizer",'/logs/cloudbet_sanitizer.log', logging.DEBUG )
 def cloudbet_sanitizer(cloudbet_data: list[CloudbetEvent], db) -> tuple[list[Event], Provider]:
     events: list[Event] = []
     for event in cloudbet_data:
@@ -81,6 +83,11 @@ def cloudbet_sanitizer(cloudbet_data: list[CloudbetEvent], db) -> tuple[list[Eve
                     markets=markets,
                     matched=False,
                 )
+
+                lg.info(f"Adding {event.name}...")
+                lg.info(f"outcomes: {[team_a,team_b]}")
+                lg.info(f"providers: {[cloudbetprovider]}")
+                lg.info(f"\n"*5)
                 db.add(e)
                 db.flush()
                 events.append(e)

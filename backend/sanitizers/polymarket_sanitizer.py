@@ -1,7 +1,11 @@
+import logging
 from datetime import datetime, timezone
 
 from db import Provider, Market, Event, Outcome
+from log import setup_logger
 from models.polymarket import CleanedPolymarketOdds
+
+lg = setup_logger("poly_sanitizer", '/logs/poly_sanitizer.log', logging.DEBUG)
 
 
 def polymarket_sanitizer(polymarket_data: list[CleanedPolymarketOdds], db) -> tuple[list[Event], Provider]:
@@ -64,6 +68,11 @@ def polymarket_sanitizer(polymarket_data: list[CleanedPolymarketOdds], db) -> tu
                 markets=markets,
                 matched=False
             )
+
+            lg.info(f"Adding {event.name}...")
+            lg.info(f"outcomes: {outcomes}")
+            lg.info(f"providers: {polymarketProvider}")
+            lg.info(f"\n" * 5)
             events.append(event)
             db.add(event)
             db.flush()
