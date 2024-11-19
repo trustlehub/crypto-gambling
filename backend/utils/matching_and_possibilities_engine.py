@@ -62,6 +62,7 @@ async def matching_and_possibilities_engine(events, db):
                 outcomes=[o1]
             )
             got_a_match = False
+            tried_outcomes = []
             for o2 in event2.outcomes:
                 similarity = fuzz.ratio(o1.name.lower(), o2.name.lower())
                 threshold = 50
@@ -74,10 +75,15 @@ async def matching_and_possibilities_engine(events, db):
                 else:
                     lg.info(
                         f"Couldn't match outcomes:: {o1.name, o1.provider.name} || {o2.name, o2.provider.name} || {similarity} \n")
+                    tried_outcomes.append({
+                        o2.name: similarity
+                    })
 
             if not got_a_match:
                 lg.warn(
                     f"Couldn't find an outcome to {o1.name, o1.provider.name} \n")
+                lg.warn(
+                    f"tried: {tried_outcomes}")
 
         db.add_all(matched_outcomes)
         db.add(
