@@ -60,7 +60,7 @@ async def matching_and_possibilities_engine(events, db):
             mo = MatchedOutcome(
                 outcomes=[o1]
             )
-            got_a_match = false
+            got_a_match = False
             for o2 in event2.outcomes:
                 similarity = fuzz.ratio(o1.name.lower(), o2.name.lower())
                 threshold = 50
