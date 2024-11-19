@@ -60,14 +60,19 @@ async def matching_and_possibilities_engine(events, db):
             mo = MatchedOutcome(
                 outcomes=[o1]
             )
+            got_a_match = false
             for o2 in event2.outcomes:
                 similarity = fuzz.ratio(o1.name.lower(), o2.name.lower())
                 threshold = 50
                 if similarity > threshold:
+                    got_a_match = True
                     mo.outcomes.append(o2)
                     lg.info(
                         f"Matched outcomes:: {o1} || {o2} || {similarity} \n for matched events:: {event1} || {event2}")
                     matched_outcomes.append(mo)
+            if not got_a_match:
+                lg.warn(
+                    f"Could't match an outcome to {o1} \n for matched events:: {event1} || {event2}")
 
         db.add_all(matched_outcomes)
         db.add(
