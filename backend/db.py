@@ -116,6 +116,7 @@ class MatchedOutcome(Base, PrintableBase):
 def clone_events(events: list[Event]):
     cloned_events = []
     for event in events:
+        print(f"to be cloned meta: {event.meta}")
         outcome_list = []
         market_list = []
         provider = Provider(

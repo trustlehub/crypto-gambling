@@ -68,6 +68,7 @@ async def matching_and_possibilities_engine(events, db):
                     # so that we can save them in the database. otherwise existing objects
                     # will be updated
                     (cloned_1, cloned_2) = clone_events([event1, event2])
+                    lg.info(f"meta: {cloned_1.meta, cloned_2.meta}")
                     matched_events.append((cloned_1, cloned_2))
                 lg.debug("\n" * 3)
             else:
