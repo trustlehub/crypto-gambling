@@ -14,17 +14,17 @@ lg = setup_logger('matching_and_possibilities_engine', '/logs/matching.log', log
 async def matching_and_possibilities_engine(events, db):
     matched_events: list[tuple[Event, Event]] = []
     sources = [
-        db.query(Event).join(Provider).filter(Event.matched == False, Provider.name == 'matchbook').options(
+        *db.query(Event).join(Provider).filter(Event.matched == False, Provider.name == 'matchbook').options(
             joinedload(Event.outcomes),
             joinedload(Event.providers),
             joinedload(Event.markets), )
         .all(),
-        db.query(Event).join(Provider).filter(Event.matched == False, Provider.name == 'cloudbet').options(
+        *db.query(Event).join(Provider).filter(Event.matched == False, Provider.name == 'cloudbet').options(
             joinedload(Event.outcomes),
             joinedload(Event.providers),
             joinedload(Event.markets), )
         .all(),
-        db.query(Event).join(Provider).filter(Event.matched == False, Provider.name == 'polymarket').options(
+        *db.query(Event).join(Provider).filter(Event.matched == False, Provider.name == 'polymarket').options(
             joinedload(Event.outcomes),
             joinedload(Event.providers),
             joinedload(Event.markets), )
@@ -35,9 +35,7 @@ async def matching_and_possibilities_engine(events, db):
     # Get combinations of 2 event lists from the list of sources. This ensures 
     # all events from all apis are matched properly with each other
 
-    for list1, list2 in combinations(sources, 2):
-        # For each pair, iterate over the Cartesian product of the events
-        for event1, event2 in product(list1, list2):
+    for event1, event2 in combinations(sources, 2):
 
             # Time difference is mainly how we recognise events are similar
             time_difference = (abs(
