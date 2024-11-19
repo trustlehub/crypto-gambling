@@ -174,8 +174,8 @@ async def matching_and_possibilities_engine(events, db):
             start_time=event1.start_time,
             meta={**(event1.meta if event1.meta is not None else {}),
                   **(event2.meta if event2.meta is not None else {})},
-            markets=[*market1_list, market2_list],
-            outcomes=[*outcome1_list, outcome2_list],
+            markets=[*market1_list, *market2_list],
+            outcomes=[*outcome1_list, *outcome2_list],
             last_updated=event1.last_updated,
             matched=True
         )
