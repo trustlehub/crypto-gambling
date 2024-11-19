@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from itertools import product
+from itertools import product, combinations
 
 from fuzzywuzzy import fuzz
 from sqlalchemy.orm import joinedload
@@ -14,17 +14,17 @@ lg = setup_logger('matching_and_possibilities_engine', '/logs/matching.log', log
 async def matching_and_possibilities_engine(events, db):
     matched_events: list[tuple[Event, Event]] = []
     sources = [
-        *db.query(Event).join(Provider).filter(Event.matched == False, Provider.name == 'matchbook').options(
+        db.query(Event).join(Provider).filter(Event.matched == False, Provider.name == 'matchbook').options(
             joinedload(Event.outcomes),
             joinedload(Event.providers),
             joinedload(Event.markets), )
         .all(),
-        *db.query(Event).join(Provider).filter(Event.matched == False, Provider.name == 'cloudbet').options(
+        db.query(Event).join(Provider).filter(Event.matched == False, Provider.name == 'cloudbet').options(
             joinedload(Event.outcomes),
             joinedload(Event.providers),
             joinedload(Event.markets), )
         .all(),
-        *db.query(Event).join(Provider).filter(Event.matched == False, Provider.name == 'polymarket').options(
+        db.query(Event).join(Provider).filter(Event.matched == False, Provider.name == 'polymarket').options(
             joinedload(Event.outcomes),
             joinedload(Event.providers),
             joinedload(Event.markets), )
@@ -35,44 +35,45 @@ async def matching_and_possibilities_engine(events, db):
     # Get combinations of 2 event lists from the list of sources. This ensures 
     # all events from all apis are matched properly with each other
 
-    for event1, event2 in product(sources, repeat=2):
+    for list1, list2 in combinations(sources, 2):
+        # For each pair, iterate over the Cartesian product of the events
+        for event1, event2 in product(list1, list2):
+            if event1 == event2:
+                continue
 
-        if event1 == event2:
-            continue
+                # Time difference is mainly how we recognise events are similar
+            time_difference = (abs(
+                datetime.fromisoformat(event2.start_time) - datetime.fromisoformat(event1.start_time))
+                               .total_seconds())
+            if time_difference == 0:
+                matches = 0
 
-            # Time difference is mainly how we recognise events are similar
-        time_difference = (abs(
-            datetime.fromisoformat(event2.start_time) - datetime.fromisoformat(event1.start_time))
-                           .total_seconds())
-        if time_difference == 0:
-            matches = 0
+                for team1 in event1.outcomes:
+                    for team2 in event2.outcomes:
+                        similarity = fuzz.ratio(team1.name.lower(), team2.name.lower())
+                        threshold = 50
+                        if similarity > threshold:
+                            matches += 1
+                        if matches >= 2:
+                            # Two teams matched as well. No need to loop again
+                            break
+                        lg.debug(f'similarity: {similarity} || team1:{team1.name}, team2:{team2.name}')
 
-            for team1 in event1.outcomes:
-                for team2 in event2.outcomes:
-                    similarity = fuzz.ratio(team1.name.lower(), team2.name.lower())
-                    threshold = 50
-                    if similarity > threshold:
-                        matches += 1
                     if matches >= 2:
                         # Two teams matched as well. No need to loop again
                         break
-                    lg.debug(f'similarity: {similarity} || team1:{team1.name}, team2:{team2.name}')
 
                 if matches >= 2:
-                    # Two teams matched as well. No need to loop again
-                    break
-
-            if matches >= 2:
-                # We need to clone the events along with all the related objects
-                # so that we can save them in the database. otherwise existing objects
-                # will be updated
-                (cloned_1, cloned_2) = clone_events([event1, event2])
-                matched_events.append((cloned_1, cloned_2))
-            lg.debug("\n" * 3)
-        else:
-            lg.debug(f"Didn't match events because of time mismatch. time diff: {time_difference} ")
-            lg.debug(f"Events: {event1.name} and {event2.name}")
-            lg.debug("=" * 10 + "\n" * 2)
+                    # We need to clone the events along with all the related objects
+                    # so that we can save them in the database. otherwise existing objects
+                    # will be updated
+                    (cloned_1, cloned_2) = clone_events([event1, event2])
+                    matched_events.append((cloned_1, cloned_2))
+                lg.debug("\n" * 3)
+            else:
+                lg.debug(f"Didn't match events because of time mismatch. time diff: {time_difference} ")
+                lg.debug(f"Events: {event1.name} and {event2.name}")
+                lg.debug("=" * 10 + "\n" * 2)
 
     for event1, event2 in matched_events:
 
