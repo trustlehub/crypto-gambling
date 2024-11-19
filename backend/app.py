@@ -119,15 +119,23 @@ async def get_events(db: Session = Depends(get_db)):
     events = db.query(Event).filter(Event.matched == True).all()
     final_odds: list[OddsCleaned] = []
     total = 0
+
+    # Iterate through each matched event
     for event in events:
+
+        # Get all of the events outcomes,
         lg.debug(f"event: {event}")
         outcomes: list[Outcome] = event.outcomes
         lg.debug(f"outcomes: {[(outcome.name, outcome.provider) for outcome in outcomes]}")
+
         for o1, o2 in permutations(outcomes, 2):
-            if o2 in o1.matched_outcome.outcomes:
+            # Matched outcomes are the same outcomes from different providers
+            # so we want the non matched ones
+            all_outcomes_matched_with_o2 = [mo.outcome for mo in o2.matched_outcomes]
+            if o2 in all_outcomes_matched_with_o2:
                 lg.info("skipping this combination: same team")
                 continue
-            elif o1.provider_id == o2.provider_id:
+            elif o1.provider.name == o2.provider.name:
                 lg.info("skipping this combination: same provider")
             else:
                 final_odds.append(
