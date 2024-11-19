@@ -35,37 +35,40 @@ async def matching_and_possibilities_engine(events, db):
     # Get combinations of 2 event lists from the list of sources. This ensures 
     # all events from all apis are matched properly with each other
 
-    for event1, event2 in combinations(sources, 2):
+    for event1, event2 in product(sources, repeat=2):
+        
+        if event1 == event2:
+            continue    
 
-            # Time difference is mainly how we recognise events are similar
-            time_difference = (abs(
-                datetime.fromisoformat(event2.start_time) - datetime.fromisoformat(event1.start_time))
-                               .total_seconds())
-            if time_difference == 0:
-                matches = 0
+       # Time difference is mainly how we recognise events are similar
+       time_difference = (abs(
+           datetime.fromisoformat(event2.start_time) - datetime.fromisoformat(event1.start_time))
+                          .total_seconds())
+       if time_difference == 0:
+           matches = 0
 
-                for team1 in event1.outcomes:
-                    for team2 in event2.outcomes:
-                        similarity = fuzz.ratio(team1.name.lower(), team2.name.lower())
-                        threshold = 50
-                        if similarity > threshold:
-                            matches += 1
-                        if matches >= 2:
-                            # Two teams matched as well. No need to loop again
-                            break
-                        lg.debug(f'similarity: {similarity} || team1:{team1.name}, team2:{team2.name}')
+           for team1 in event1.outcomes:
+               for team2 in event2.outcomes:
+                   similarity = fuzz.ratio(team1.name.lower(), team2.name.lower())
+                   threshold = 50
+                   if similarity > threshold:
+                       matches += 1
+                   if matches >= 2:
+                       # Two teams matched as well. No need to loop again
+                       break
+                   lg.debug(f'similarity: {similarity} || team1:{team1.name}, team2:{team2.name}')
 
-                    if matches >= 2:
-                        # Two teams matched as well. No need to loop again
-                        break
+               if matches >= 2:
+                   # Two teams matched as well. No need to loop again
+                   break
 
-                if matches >= 2:
-                    matched_events.append((event2, event1))
-                lg.debug("\n" * 3)
-            else:
-                lg.debug(f"Didn't match events because of time mismatch. time diff: {time_difference} ")
-                lg.debug(f"Events: {event1.name} and {event2.name}")
-                lg.debug("=" * 10 + "\n" * 2)
+           if matches >= 2:
+               matched_events.append((event2, event1))
+           lg.debug("\n" * 3)
+       else:
+           lg.debug(f"Didn't match events because of time mismatch. time diff: {time_difference} ")
+           lg.debug(f"Events: {event1.name} and {event2.name}")
+           lg.debug("=" * 10 + "\n" * 2)
 
     for event1, event2 in matched_events:
 
