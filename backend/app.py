@@ -122,7 +122,7 @@ async def get_events(db: Session = Depends(get_db)):
     for event in events:
         lg.debug(f"event: {event}")
         outcomes: list[Outcome] = event.outcomes
-        lg.debug(f"outcomes: {outcomes}")
+        lg.debug(f"outcomes: {[(outcome.name, outcome.provider) for outcome in outcomes]}")
         for o1, o2 in permutations(outcomes, 2):
             if o2 in o1.matched_outcome.outcomes:
                 lg.info("skipping this combination: same team")
