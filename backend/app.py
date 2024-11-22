@@ -141,7 +141,7 @@ async def get_events(lay_as_back: bool = None, db: Session = Depends(get_db)):
 
             all_outcomes_matched_with_o1 = [*(mo.outcomes for mo in o1.matched_outcomes)]
             if o2 not in all_outcomes_matched_with_o1:
-                lg.info("skipping this combination: same different teams")
+                lg.info(f"skipping this combination: {o2.name, o1.name}: same different teams")
                 continue
             elif o1.provider.name == o2.provider.name:
                 lg.info("skipping this combination: same provider")
