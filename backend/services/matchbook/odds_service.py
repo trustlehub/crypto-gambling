@@ -28,5 +28,7 @@ async def fetch_all_events(api_instance: MatchbookApiInstance) -> list[Matchbook
         print(event.name)
 
     lg.info(f"Got {len(events)} events from matchbook")
+    
+    await api_instance.close()
 
     return events
