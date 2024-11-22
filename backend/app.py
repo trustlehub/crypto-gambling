@@ -138,7 +138,9 @@ async def get_events(lay_as_back: bool = None, db: Session = Depends(get_db)):
             if not o1.provider.is_bookmaker or not o2.provider.is_exchange:
                 continue
 
-            all_outcomes_matched_with_o1 = [*(mo.outcomes for mo in o1.matched_outcomes)]
+            all_outcomes_matched_with_o1 = []
+            for matched_outcome in o1.matched_outcomes:
+                all_outcomes_matched_with_o1.extend(matched_outcome.outcomes)
             lg.debug("matched outcomes with o1")
             for i in all_outcomes_matched_with_o1:
                 lg.debug(f"{i.name}, {i.provider.name}")
