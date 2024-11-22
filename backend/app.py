@@ -141,16 +141,21 @@ async def get_events(lay_as_back: bool = None, db: Session = Depends(get_db)):
             all_outcomes_matched_with_o1 = []
             for matched_outcome in o1.matched_outcomes:
                 all_outcomes_matched_with_o1.extend(matched_outcome.outcomes)
-            lg.debug("matched outcomes with o1")
-            for i in all_outcomes_matched_with_o1:
-                lg.debug(f"{i.name}, {i.provider.name}")
+
+            # lg.debug("matched outcomes with o1")
+            # for i in all_outcomes_matched_with_o1:
+            #     lg.debug(f"{i.name}, {i.provider.name}")
             if o2 in all_outcomes_matched_with_o1:
                 # this means o2 was matched with o1 as similar outcomes. So most likely, they are the same team
                 lg.debug(f"{o2.name, o1.name}:  same teams")
+
+            if o2 not in all_outcomes_matched_with_o1:
+                continue
+               
             elif o1.provider.name == o2.provider.name:
                 lg.debug("skipping this combination: same provider")
                 continue
-                
+
             final_odds.append(
                 # o1 is the bet_team and o2 is the lay team. so o1's provider is 
                 # bookmaker and o2's provider is exchange
