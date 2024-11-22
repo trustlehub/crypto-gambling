@@ -1,9 +1,11 @@
 import asyncio
+import logging
 
 from apis.matchbook import MatchbookApiInstance
+from log import setup_logger
 from models.matchbook import MatchbookEvent, MatchbookEvents
 
-
+lg = setup_logger("matchbook_odds_service", "/logs/matchbook_odds_service.log", logging.DEBUG)
 async def fetch_all_events(api_instance: MatchbookApiInstance) -> list[MatchbookEvent]:
     url = 'https://api.matchbook.com/edge/rest/events?sport-ids=1&states=open&exchange-type=back-lay&side=lay'
 
@@ -16,7 +18,7 @@ async def fetch_all_events(api_instance: MatchbookApiInstance) -> list[Matchbook
         requests.append(api_instance.get(f"{url}&offset={i}"))
 
     responses = await asyncio.gather(*requests)
-    print(f"Got {len(responses)} responses from matchbook")
+    lg.info(f"Got {len(responses)} responses from matchbook")
 
     for data in responses:
         s = MatchbookEvents(**data)
@@ -25,6 +27,6 @@ async def fetch_all_events(api_instance: MatchbookApiInstance) -> list[Matchbook
     for event in events:
         print(event.name)
 
-    print(f"Got {len(events)} events from matchbook")
+    lg.info(f"Got {len(events)} events from matchbook")
 
     return events
