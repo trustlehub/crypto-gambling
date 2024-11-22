@@ -89,7 +89,7 @@ const Calculator = () => {
             exchange_com
         ))
         setBack_win(profitBookmakerWins(back_stake, back_odds_input, liability))
-    }, [back_stake, lay_stake, back_odds_input, lay_odds_input]);
+    }, [back_stake, lay_stake, back_odds_input, lay_odds_input, exchange_com, bookmaker_com]);
     return <Box sx={{...style}}>
         <Box sx={{display: 'grid', gridAutoFlow: 'column',}}>
             <Box sx={{minHeight: '80px', minWidth: '100px',}}>
