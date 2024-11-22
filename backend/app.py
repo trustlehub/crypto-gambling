@@ -204,4 +204,4 @@ async def get_events(lay_as_back: bool = None, db: Session = Depends(get_db)):
             )
             total += 1
 
-    return sorted(final_odds, key=lambda x: float(x.rating), reverse=True)
+    return [item for item in sorted(final_odds, key=lambda x: float(x.rating), reverse=True) if float(item.rating) < 120]
