@@ -140,9 +140,9 @@ async def get_events(lay_as_back: bool = None, db: Session = Depends(get_db)):
                 continue
 
             all_outcomes_matched_with_o1 = [*(mo.outcomes for mo in o1.matched_outcomes)]
-            if o2 not in all_outcomes_matched_with_o1:
-                # this means o2 was not matched with o1 as similar outcomes. So most likely, they are 2 different teams
-                lg.info(f"{o2.name, o1.name}:  different teams")
+            if o2 in all_outcomes_matched_with_o1:
+                # this means o2 was matched with o1 as similar outcomes. So most likely, they are the same team
+                lg.info(f"{o2.name, o1.name}:  same teams")
             elif o1.provider.name == o2.provider.name:
                 lg.info("skipping this combination: same provider")
                 continue
