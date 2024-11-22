@@ -160,7 +160,7 @@ async def get_events(lay_as_back: bool = None, db: Session = Depends(get_db)):
                 # o1 is the bet_team and o2 is the lay team. so o1's provider is 
                 # bookmaker and o2's provider is exchange
                 OddsCleaned(
-                    event=o1.event.name,
+                    event=event.name,
                     time=o1.event.start_time,
                     bet_team=o1.name,
                     bookmaker=o1.provider.name,
