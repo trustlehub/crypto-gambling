@@ -129,7 +129,6 @@ async def get_events(lay_as_back: bool = None, db: Session = Depends(get_db)):
         # Get all of the events outcomes,
         lg.debug(f"event: {event}")
         outcomes: list[Outcome] = event.outcomes
-        lg.debug(f"outcomes: {[(outcome.name, outcome.provider) for outcome in outcomes]}")
 
         for o1, o2 in permutations(outcomes, 2):
             # Matched outcomes are the same outcomes from different providers
