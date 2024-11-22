@@ -22,7 +22,7 @@ const Calculator = () => {
     const [back_odds_input, setBack_odds_input] = useState(selectedData?.odds || 0)
     const [lay_odds_input, setLay_odds_input] = useState(selectedData?.lay || 0)
     const [bookmaker_com, setBookmaker_com] = useState(0)
-    const [exchange_com, setExchange_com] = useState(0)
+    const [exchange_com, setExchange_com] = useState(selectedData?.meta?.[selectedData.exchange]?.['commission'] || 0)
     const [back_stake, setBack_stake] = useState(10)
     const [back_win, setBack_win] = useState({
         bookmaker: 0,
@@ -70,6 +70,7 @@ const Calculator = () => {
 
     }, [typing]);
     useEffect(() => {
+        // Calculating 
         const lay = layStakeCalc(
             back_odds_input,
             lay_odds_input,

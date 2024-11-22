@@ -100,7 +100,6 @@ const BasicTable: React.FC = () => {
                                 <TableCell align="right">{row.maxLay}</TableCell>
                                 <TableCell align="right"><Button onClick={() => {
                                     setSelectedData(row)
-                                    setExchange_com(row.meta?.[row.exchange]?.['commission'])
                                     setmodalOpen(true)
                                 }}>Calc</Button></TableCell>
                             </TableRow>
