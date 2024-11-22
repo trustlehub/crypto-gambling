@@ -1,11 +1,11 @@
 export const layStakeCalc = (back_odds: number, lay_odds: number, back_stake: number, exchange_com: number) => {
-    return (back_stake * back_odds) / (lay_odds - (lay_odds * exchange_com))
+    return (back_stake * back_odds) / (lay_odds - (lay_odds * exchange_com / 100))
 
 }
 export const maxBackStakeCalc = (max_lay: number, lay_odds: number, back_odds: number,
                                  exchange_com: number
 ) => {
-    return (max_lay * (lay_odds - (lay_odds * exchange_com))) / back_odds
+    return (max_lay * (lay_odds - (lay_odds * exchange_com / 100))) / back_odds
 
 }
 export const liabilityCalc = (lay_stake: number, lay_odds: number) => {

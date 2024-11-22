@@ -6,8 +6,9 @@ from db import Market, Outcome, Event, Provider
 from log import setup_logger
 from models.matchbook import MatchbookEvent
 
+lg = setup_logger("matchbook_sanitizer", '/logs/matchbook_sanitizer.log', logging.DEBUG)
 
-lg = setup_logger("matchbook_sanitizer",'/logs/matchbook_sanitizer.log', logging.DEBUG )
+
 def matchbook_sanitizer(events: List[MatchbookEvent], db) -> tuple[list[Event], Provider]:
     event_list = []
     for event in events:
@@ -48,11 +49,10 @@ def matchbook_sanitizer(events: List[MatchbookEvent], db) -> tuple[list[Event], 
                                 'withdrawn': (market.withdrawn if hasattr(market, 'withdrawn') else None),
                                 'maxStake': price.available_amount,
                                 'currency': price.currency,
-                                'commission': 2
+                                'commission': 2  # this means 2% commission
                             }
                         },
                         outcome=db_outcome,
-                        
 
                     ))
         if len(outcomes_list) > 0 and len(markets_list) > 0:
@@ -70,7 +70,7 @@ def matchbook_sanitizer(events: List[MatchbookEvent], db) -> tuple[list[Event], 
             lg.info(f"Adding {event.name}...")
             lg.info(f"outcomes: {outcomes_list}")
             lg.info(f"providers: {matchbook_provider}")
-            lg.info(f"\n"*5)
+            lg.info(f"\n" * 5)
             event_list.append(
                 event
             )
