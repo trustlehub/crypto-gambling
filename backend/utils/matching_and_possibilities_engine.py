@@ -119,18 +119,20 @@ async def matching_and_possibilities_engine(events, db):
         if len(matched_outcomes) == 0:
             # Times matched but no outcomes matched. Go to the next item
             continue
-        db.add(
-            Event(
-                providers=[*event1.providers, *event2.providers],
-                name=event1.name,
-                start_time=event1.start_time,
-                meta={**(event1.meta if event1.meta is not None else {}),
-                      **(event2.meta if event2.meta is not None else {})},
-                markets=[*event1.markets, *event2.markets],
-                outcomes=[*event1.outcomes, *event2.outcomes],
-                last_updated=event1.last_updated,
-                matched=True
+        outcomes = [*event1.outcomes, *event2.outcomes]
+        if len(outcomes) > 0:
+            db.add(
+                Event(
+                    providers=[*event1.providers, *event2.providers],
+                    name=event1.name,
+                    start_time=event1.start_time,
+                    meta={**(event1.meta if event1.meta is not None else {}),
+                          **(event2.meta if event2.meta is not None else {})},
+                    markets=[*event1.markets, *event2.markets],
+                    outcomes=[],
+                    last_updated=event1.last_updated,
+                    matched=True
+                )
             )
-        )
 
-        db.commit()
+            db.commit()
