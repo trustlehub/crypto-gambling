@@ -22,7 +22,7 @@ const BasicTable: React.FC = () => {
     const langService: HumanizeDurationLanguage = new HumanizeDurationLanguage();
     const humanizer: HumanizeDuration = new HumanizeDuration(langService);
     const bettingProvider = useBetting()
-    const {getOdds, setSelectedData, data} = bettingProvider
+    const {getOdds, setSelectedData, data,setExchange_com} = bettingProvider
     useEffect(() => {
         getOdds()
     }, [])
@@ -100,6 +100,7 @@ const BasicTable: React.FC = () => {
                                 <TableCell align="right">{row.maxLay}</TableCell>
                                 <TableCell align="right"><Button onClick={() => {
                                     setSelectedData(row)
+                                    setExchange_com(row.meta?.[row.exchange]?.['commission'])
                                     setmodalOpen(true)
                                 }}>Calc</Button></TableCell>
                             </TableRow>
