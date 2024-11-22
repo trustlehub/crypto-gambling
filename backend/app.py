@@ -143,8 +143,13 @@ async def get_events(lay_as_back: bool = None, db: Session = Depends(get_db)):
                     # This combination shouldn't be here since we are using bookmakers for both lay and back 
                     continue
                 if o2 in all_outcomes_matched_with_o1:
-                    # this combination shouldn't be here since same teams are only matched when lay as back is set
+                    # this combination shouldn't be here since same teams are only matched when lay as back is false
                     lg.info("skipping this combination: same team. Lay as back is set. Should match different outcomes")
+                    continue
+            if not lay_as_back:
+                if o1.provider.is_exchange or not o2.provider.is_exchange:
+                    # This combination shouldn't be here since we are using bookmakers for both lay and back 
+                    lg.info("Skipping this combo. lay as back not set. o1 is exchange or o2 is bookmaker")
                     continue
             final_odds.append(
                 # o1 is the bet_team and o2 is the lay team. so o1's provider is 
