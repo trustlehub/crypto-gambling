@@ -139,6 +139,9 @@ async def get_events(lay_as_back: bool = None, db: Session = Depends(get_db)):
                 continue
 
             all_outcomes_matched_with_o1 = [*(mo.outcomes for mo in o1.matched_outcomes)]
+            lg.info("matched outcomes with o1")
+            for i in all_outcomes_matched_with_o1:
+                lg.info(f"{i.name}, {i.provider.name}")
             if o2 in all_outcomes_matched_with_o1:
                 # this means o2 was matched with o1 as similar outcomes. So most likely, they are the same team
                 lg.info(f"{o2.name, o1.name}:  same teams")
