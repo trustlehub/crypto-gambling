@@ -2,7 +2,6 @@ import logging
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from itertools import permutations
-from typing import Optional
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Depends
@@ -103,7 +102,7 @@ async def place_order(request: OrderDetails, outcome_id: int, db: Session = Depe
 
 
 @app.get("/get_events")
-async def get_events(lay_as_back: Optional[bool], db: Session = Depends(get_db)):
+async def get_events(lay_as_back: bool = None, db: Session = Depends(get_db)):
     # lay_as_back: using bookmakers for both lay and back. 
     # Basically, we are using the opposite teams's back odds instead of lay odds
 
