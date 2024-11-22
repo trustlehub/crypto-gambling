@@ -43,6 +43,7 @@ interface OddsCleaned {
     lay_last_update: string;
     lay_outcome_id: number;
     back_outcome_id: number;
+    
     rating: string;
     maxLay: string;
     lay_as_back: boolean;

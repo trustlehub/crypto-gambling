@@ -47,10 +47,12 @@ def matchbook_sanitizer(events: List[MatchbookEvent], db) -> tuple[list[Event], 
                                 'last_updated': runner.last_price_update_time,
                                 'withdrawn': (market.withdrawn if hasattr(market, 'withdrawn') else None),
                                 'maxStake': price.available_amount,
-                                'currency': price.currency
+                                'currency': price.currency,
+                                'commission': 2
                             }
                         },
-                        outcome=db_outcome
+                        outcome=db_outcome,
+                        
 
                     ))
         if len(outcomes_list) > 0 and len(markets_list) > 0:
