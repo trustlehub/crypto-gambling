@@ -22,7 +22,7 @@ async def fetch_all_events(api_instance: MatchbookApiInstance) -> list[Matchbook
 
     for data in responses:
         s = MatchbookEvents(**data)
-        events.extend(*s.events)
+        events.extend(s.events)
 
     for event in events:
         print(event.name)
