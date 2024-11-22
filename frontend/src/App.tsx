@@ -10,7 +10,7 @@ import {
     Paper,
     Button,
     Modal,
-    Box, Typography, Tooltip
+    Box, Typography, Tooltip, TablePagination, TableFooter
 } from '@mui/material';
 import Calculator from './components/calculator';
 import {useBetting} from "./services/BettingProvider";
@@ -36,6 +36,22 @@ const BasicTable: React.FC = () => {
         }
     }, []);
 
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+
+    // Handle pagination
+    const handleChangePage = (event: React.MouseEvent<HTMLButtonElement, MouseEvent> | null, page: number) => {
+        setPage(page);
+    };
+
+    const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0); // Reset to first page
+    };
+
+    // Slice data for the current page
+    const paginatedData = data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+
     return (
         <div>
             <Paper sx={{padding: 3}}>
@@ -58,7 +74,7 @@ const BasicTable: React.FC = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {data.map((row, i) => (
+                        {paginatedData.map((row, i) => (
                             <TableRow key={i}>
                                 <TableCell component="th" scope="row">
                                     {row.time}
@@ -89,6 +105,19 @@ const BasicTable: React.FC = () => {
                             </TableRow>
                         ))}
                     </TableBody>
+                    <TableFooter>
+                        <TableRow>
+                            <TablePagination
+                                rowsPerPageOptions={[5, 10, 25]} // Options for rows per page
+                                colSpan={10} // Span across all columns
+                                count={data.length} // Total number of rows
+                                rowsPerPage={rowsPerPage}
+                                page={page}
+                                onPageChange={handleChangePage}
+                                onRowsPerPageChange={handleChangeRowsPerPage}
+                            />
+                        </TableRow>
+                    </TableFooter>
                 </Table>
             </TableContainer>
             <Modal
