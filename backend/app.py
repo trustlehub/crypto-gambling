@@ -141,57 +141,58 @@ async def get_events(lay_as_back: bool = None, db: Session = Depends(get_db)):
 
             all_outcomes_matched_with_o1 = [*(mo.outcomes for mo in o1.matched_outcomes)]
             if o2 not in all_outcomes_matched_with_o1:
-                lg.info(f"skipping this combination: {o2.name, o1.name}: same different teams")
-                continue
+                # this means o2 was not matched with o1 as similar outcomes. So most likely, they are 2 different teams
+                lg.info(f"{o2.name, o1.name}:  different teams")
             elif o1.provider.name == o2.provider.name:
                 lg.info("skipping this combination: same provider")
-            else:
-                final_odds.append(
-                    # o1 is the bet_team and o2 is the lay team. so o1's provider is 
-                    # bookmaker and o2's provider is exchange
-                    OddsCleaned(
-                        event=o1.event.name,
-                        time=o1.event.start_time,
-                        bet_team=o1.name,
-                        bookmaker=o1.provider.name,
-                        exchange=o2.provider.name,
-                        odds=o1.market.odds,
-                        lay=o2.market.odds,
-                        avail="10",
-                        home_team=o1.name,
-                        away_team=o2.name,
-                        odds_last_update=datetime.now(tz=timezone.utc).isoformat(),
-                        lay_last_update=datetime.now(tz=timezone.utc).isoformat(),
-                        lay_as_back=o2.provider.is_bookmaker,
-                        rating=rating_calc(
-                            o1.market.odds,
-                            o2.market.odds,
-                            0
-                        ),
-                        maxLay="%.2f" % o2.market.meta[o2.provider.name]['maxStake']
-                               + " " + o2.market.meta[o2.provider.name]['currency'],
-                        back_outcome_id=o1.id,
-                        lay_outcome_id=o2.id,
-                        meta={
-                            o1.provider.name: {
-                                **(o1.meta[
-                                       o1.provider.name] if o1.meta is not None and o1.provider.name in o1.meta.keys() else {}),
-                                **(o2.market.meta[
-                                       o2.provider.name] if o2.market.meta is not None and o2.provider.name in o2.market.meta.keys() else {}),
-                                **(o2.event.meta[
-                                       o2.provider.name] if o2.event.meta is not None and o2.provider.name in o2.event.meta.keys() else {}),
-                            },
-                            o2.provider.name: {
-                                **(o2.meta[
-                                       o2.provider.name] if o2.meta is not None and o2.provider.name in o2.meta.keys() else {}),
-                                **(o2.market.meta[
-                                       o2.provider.name] if o2.market.meta is not None and o2.provider.name in o2.market.meta.keys() else {}),
-                                **(o2.event.meta[
-                                       o2.provider.name] if o2.event.meta is not None and o2.provider.name in o2.event.meta.keys() else {}),
-                            }
+                continue
+                
+            final_odds.append(
+                # o1 is the bet_team and o2 is the lay team. so o1's provider is 
+                # bookmaker and o2's provider is exchange
+                OddsCleaned(
+                    event=o1.event.name,
+                    time=o1.event.start_time,
+                    bet_team=o1.name,
+                    bookmaker=o1.provider.name,
+                    exchange=o2.provider.name,
+                    odds=o1.market.odds,
+                    lay=o2.market.odds,
+                    avail="10",
+                    home_team=o1.name,
+                    away_team=o2.name,
+                    odds_last_update=datetime.now(tz=timezone.utc).isoformat(),
+                    lay_last_update=datetime.now(tz=timezone.utc).isoformat(),
+                    lay_as_back=o2.provider.is_bookmaker,
+                    rating=rating_calc(
+                        o1.market.odds,
+                        o2.market.odds,
+                        0
+                    ),
+                    maxLay="%.2f" % o2.market.meta[o2.provider.name]['maxStake']
+                           + " " + o2.market.meta[o2.provider.name]['currency'],
+                    back_outcome_id=o1.id,
+                    lay_outcome_id=o2.id,
+                    meta={
+                        o1.provider.name: {
+                            **(o1.meta[
+                                   o1.provider.name] if o1.meta is not None and o1.provider.name in o1.meta.keys() else {}),
+                            **(o2.market.meta[
+                                   o2.provider.name] if o2.market.meta is not None and o2.provider.name in o2.market.meta.keys() else {}),
+                            **(o2.event.meta[
+                                   o2.provider.name] if o2.event.meta is not None and o2.provider.name in o2.event.meta.keys() else {}),
                         },
-                    )
+                        o2.provider.name: {
+                            **(o2.meta[
+                                   o2.provider.name] if o2.meta is not None and o2.provider.name in o2.meta.keys() else {}),
+                            **(o2.market.meta[
+                                   o2.provider.name] if o2.market.meta is not None and o2.provider.name in o2.market.meta.keys() else {}),
+                            **(o2.event.meta[
+                                   o2.provider.name] if o2.event.meta is not None and o2.provider.name in o2.event.meta.keys() else {}),
+                        }
+                    },
                 )
-                total += 1
+            )
+            total += 1
 
     return sorted(final_odds, key=lambda x: float(x.rating), reverse=True)
