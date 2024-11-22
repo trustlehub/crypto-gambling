@@ -10,7 +10,7 @@ import log
 
 Base = declarative_base()
 
-lg = log.setup_logger("sqlalchemy.engine", '/logs/sqlalchemy.log', logging.INFO)
+# lg = log.setup_logger("sqlalchemy.engine", '/logs/sqlalchemy.log', logging.INFO)
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///crypto.sqlite"  # Change this to your DB URL
 

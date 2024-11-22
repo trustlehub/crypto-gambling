@@ -116,6 +116,9 @@ async def matching_and_possibilities_engine(events, db):
 
         db.add_all(matched_outcomes)
         lg.info("Matched outcomes added to db")
+        if len(matched_outcomes) == 0:
+            # Times matched but no outcomes matched. Go to the next item
+            continue
         db.add(
             Event(
                 providers=[*event1.providers, *event2.providers],
