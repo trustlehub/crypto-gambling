@@ -84,7 +84,7 @@ const BasicTable: React.FC = () => {
                                         {row.event}
                                     </Typography>
                                     <Typography variant={'body2'}>
-                                        {row.home_team} vs {row.away_team}
+                                        {row.home_team} || {row.away_team}
                                     </Typography>
                                 </TableCell>
                                 <TableCell align="right">{row.bet_team}</TableCell>
