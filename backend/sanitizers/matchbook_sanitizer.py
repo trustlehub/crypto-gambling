@@ -34,6 +34,9 @@ def matchbook_sanitizer(events: List[MatchbookEvent], db) -> tuple[list[Event], 
                         meta={
                             matchbook_provider.name: {
                                 'volume': runner.volume,
+                                'runner_id': runner.id,
+                                'market_id': runner.market_id,
+                                'event_id': runner.event_id,
                             }
                         },
                         provider=matchbook_provider,
@@ -49,7 +52,8 @@ def matchbook_sanitizer(events: List[MatchbookEvent], db) -> tuple[list[Event], 
                                 'withdrawn': (market.withdrawn if hasattr(market, 'withdrawn') else None),
                                 'maxStake': price.available_amount,
                                 'currency': price.currency,
-                                'commission': 2  # this means 2% commission
+                                'commission': 2 , # this means 2% commission
+                                'market_id': market.id
                             }
                         },
                         outcome=db_outcome,
@@ -64,6 +68,11 @@ def matchbook_sanitizer(events: List[MatchbookEvent], db) -> tuple[list[Event], 
                 outcomes=outcomes_list,
                 markets=markets_list,
                 matched=False,
+                meta={
+                    matchbook_provider.name: {
+                        "event_id": event.id
+                    }
+                }
             )
             db.add(event)
             db.commit()

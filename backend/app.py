@@ -1,4 +1,5 @@
 import logging
+import os
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from itertools import permutations
@@ -44,10 +45,10 @@ matchbook_api = MatchbookApiInstance()
 async def app_lifespan(app: FastAPI):
     # Startup logic
     print("Starting up...")
-    # await matchbook_api.authenticate(
-    #     username="kidfrommars",
-    #     password="L1a2s3a4n5"
-    # )
+    await matchbook_api.authenticate(
+        username=os.environ.get("MATCHBOOK_USERNAME"),
+        password=os.environ.get("MATCHBOOK_PASSWORD")
+    )
     yield  # Control transfers to the application here
     # Shutdown logic
     print("Shutting down...")
@@ -151,7 +152,7 @@ async def get_events(lay_as_back: bool = None, db: Session = Depends(get_db)):
 
             if o2 not in all_outcomes_matched_with_o1:
                 continue
-               
+
             elif o1.provider.name == o2.provider.name:
                 lg.debug("skipping this combination: same provider")
                 continue
@@ -204,4 +205,5 @@ async def get_events(lay_as_back: bool = None, db: Session = Depends(get_db)):
             )
             total += 1
 
-    return [item for item in sorted(final_odds, key=lambda x: float(x.rating), reverse=True) if float(item.rating) < 120]
+    return [item for item in sorted(final_odds, key=lambda x: float(x.rating), reverse=True) if
+            float(item.rating) < 120]
