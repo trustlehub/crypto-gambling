@@ -35,6 +35,7 @@ async def matchbook_betting_service(outcome: Outcome, stake: str, matchbook_api:
                                                     "stake": stake,
                                                 }
                                             ]
-                                        }
+                                        },
+                                        authenticated=True
                                         )
     return response
