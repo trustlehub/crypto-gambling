@@ -41,7 +41,7 @@ class MatchbookApiInstance:
             else:
                 response_text = await response.text()
                 raise Exception(f"Request failed: {response.status} {response_text}")
-        if not self.session or authenticated:
+        if not self.session:
             await session.close()
 
     async def post(self, endpoint: str, data: dict, authenticated: bool = False, **kwargs):
@@ -61,7 +61,7 @@ class MatchbookApiInstance:
                 response_text = await response.text()
                 raise Exception(f"Request failed: {response.status} {response_text}")
 
-        if not self.session or authenticated:
+        if not self.session:
             await session.close()
 
     async def close(self):
