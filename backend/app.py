@@ -21,6 +21,7 @@ from sanitizers.matchbook_sanitizer import matchbook_sanitizer
 from sanitizers.polymarket_sanitizer import polymarket_sanitizer
 from services.cloudbet.betting_service import cloudbet_betting_service
 from services.cloudbet.odds_service import fetch_all_events as fetch_cloudbet_data
+from services.matchbook.betting_service import matchbook_betting_service
 from services.matchbook.odds_service import fetch_all_events as fetch_matchbook_data
 from services.polymarket.betting_service import polymarket_betting_service
 from services.polymarket.odds_service import fetch_all_events as fetch_polymarket_data
@@ -95,6 +96,13 @@ async def place_order(request: OrderDetails, outcome_id: int, db: Session = Depe
             r = await cloudbet_betting_service(
                 outcome=outcome,
                 cloudbet_api=cloudbet_api,
+                stake=str(request.size),
+            )
+            return r
+        elif provider_name == 'matchbook':
+            r = await matchbook_betting_service(
+                outcome=outcome,
+                matchbook_api=matchbook_api,
                 stake=str(request.size),
             )
             return r
