@@ -20,49 +20,33 @@ class MatchbookApiInstance:
                 else:
                     raise Exception(f"Authentication failed: {response.status} {await response.text()}")
 
-        # Keep an active session
-        self.session = aiohttp.ClientSession(headers={"session-token": f"{self.token},",
-                                                      'content-type': 'application/json',
-                                                      'accept': 'application/json'
-                                                      })
 
-    async def get(self, endpoint: str, authenticated: bool = False, **kwargs):
+    async def get(self, endpoint: str, **kwargs):
         """Make a request with the active session."""
-        if not self.session and authenticated:
-            raise Exception("Client is not authenticated. Call `authenticate` first.")
 
-        session = (aiohttp.ClientSession(headers={
+        async with aiohttp.ClientSession(headers={
             'content-type': 'application/json',
             'accept': 'application/json'
-        }) if not self.session or not authenticated else self.session)
-        async with session.get(f"{endpoint}", **kwargs) as response:
+        }).get(f"{endpoint}", **kwargs) as response:
             if response.status == 200:
                 return await response.json()
             else:
                 response_text = await response.text()
                 raise Exception(f"Request failed: {response.status} {response_text}")
-        if not self.session:
-            await session.close()
 
     async def post(self, endpoint: str, data: dict, authenticated: bool = False, **kwargs):
         """Make a request with the active session."""
-        if not self.session and authenticated:
-            raise Exception("Client is not authenticated. Call `authenticate` first.")
 
-        session = (aiohttp.ClientSession(headers={
+        async with aiohttp.ClientSession(headers={
             'content-type': 'application/json',
-            'accept': 'application/json'
-        }) if not self.session or not authenticated else self.session)
-
-        async with session.post(f"{endpoint}", json=data, **kwargs, ) as response:
+            'accept': 'application/json',
+            'session-token': f"{self.token}" if authenticated else None
+        }).post(f"{endpoint}", json=data, **kwargs, ) as response:
             if response.status == 200:
                 return await response.json()
             else:
                 response_text = await response.text()
                 raise Exception(f"Request failed: {response.status} {response_text}")
-
-        if not self.session:
-            await session.close()
 
     async def close(self):
         """Close the session."""
