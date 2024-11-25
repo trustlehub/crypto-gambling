@@ -13,7 +13,7 @@ class MatchbookApiInstance:
             'accept': 'application/json'
         }) as session:
             async with session.post("https://api.matchbook.com/bpapi/rest/security/session",
-                                    data={'username': username, "password": password}) as response:
+                                    json={'username': username, "password": password}) as response:
                 if response.status == 200:
                     data = await response.json()
                     self.token = data.get("session-token")  # Adjust the key based on your API response
