@@ -21,8 +21,8 @@ class PolymarketApiInstance:
                             lg.debug("Rate limited on Polymarket")
                             retry_after = response.headers.get('Retry-After', None)
                             delay = int(retry_after) if retry_after else 1
-                            await asyncio.sleep(delay)
                             lg.debug(f"Retrying after {delay} seconds")
+                            await asyncio.sleep(delay)
                             continue
                         else:
                             return {  # Default error response handling
