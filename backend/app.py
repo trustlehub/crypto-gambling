@@ -118,7 +118,7 @@ async def get_events(lay_as_back: bool = None, db: Session = Depends(get_db)):
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
 
-    polymarket_data = await fetch_polymarket_data(polymarket_api, 30)
+    polymarket_data = await fetch_polymarket_data(polymarket_api, 5)
     cloudbet_data = await fetch_cloudbet_data(cloudbet_api)
     matchbook_data = await fetch_matchbook_data(matchbook_api)
 
