@@ -1,6 +1,9 @@
+import logging
+
 import aiohttp
 
-
+from log import setup_logger
+lg = setup_logger("matchbook_api", "/logs/matchbook_api.log", logging.DEBUG)
 class MatchbookApiInstance:
     def __init__(self):
         self.session = None
@@ -18,6 +21,7 @@ class MatchbookApiInstance:
                     data = await response.json()
                     self.token = data.get("session-token")  # Adjust the key based on your API response
                 else:
+                    lg.error(f"Authentication failed: {response.status} {await response.text()}")
                     raise Exception(f"Authentication failed: {response.status} {await response.text()}")
 
 
@@ -32,6 +36,7 @@ class MatchbookApiInstance:
                 return await response.json()
             else:
                 response_text = await response.text()
+                lg.error(f"Request failed: {response.status} {response_text}")
                 raise Exception(f"Request failed: {response.status} {response_text}")
 
     async def post(self, endpoint: str, data: dict, authenticated: bool = False, **kwargs):
@@ -46,6 +51,7 @@ class MatchbookApiInstance:
                 return await response.json()
             else:
                 response_text = await response.text()
+                lg.error(f"Request failed: {response.status} {response_text}")
                 raise Exception(f"Request failed: {response.status} {response_text}")
 
     async def close(self):

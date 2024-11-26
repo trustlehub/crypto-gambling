@@ -1,5 +1,10 @@
+import logging
+
 import aiohttp
 
+from log import setup_logger
+
+lg = setup_logger("cloudbet_api", "/logs/cloudbet_api.log", logging.DEBUG)
 
 class CloudbetApiInstance:
     def __init__(self, config):
@@ -18,6 +23,7 @@ class CloudbetApiInstance:
                     return await response.json()
                 else:
                     text = await response.text()
+                    lg.error(f"Failed to post data: {response.status} {text}")
                     raise Exception(text)
             
     async def get(self, endpoint):
@@ -27,6 +33,7 @@ class CloudbetApiInstance:
                 if response.status == 200:
                     return await response.json()
                 else:
+                    lg.error(f"Failed to fetch data: {response.status}")
                     raise Exception(f"Failed to fetch data: {response.status}")
 
 
