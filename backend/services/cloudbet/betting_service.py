@@ -19,7 +19,7 @@ async def cloudbet_betting_service(outcome: Outcome, stake: str, cloudbet_api: C
     event = CloudbetEvent(
         **confirmation_response
     )
-    sanitized_events, providers = cloudbet_sanitizer([event])
+    sanitized_events, providers = cloudbet_sanitizer([event],None, no_commit=True)
     event = sanitized_events[0]
 
     # checking whether price has changed
