@@ -126,6 +126,7 @@ async def task(event):
         lg.debug(o)
 
     lg.debug(f"Checking odds for event {event.event}")
+    lg.debug(event)
     for outcome in json_outcomes:
         if outcome is None:
             continue
