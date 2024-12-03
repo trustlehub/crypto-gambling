@@ -105,7 +105,6 @@ async def check_odds_polymarket(event, outcome):
 
         if token['token_id'] == token_id:
             if token['price'] != price:
-                lg.debug(token['price'], price)
                 lg.error(f"Latest price was {token['price']} provided odds: {price}")
 
     lg.debug("polymarket odds ok")
