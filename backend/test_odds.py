@@ -49,9 +49,9 @@ async def get_odds() -> list[OddsCleaned]:
             return cleaned_odds
 
 
-async def check_odds_cloudbet(outcome: Outcome):
+async def check_odds_cloudbet(outcome):
     lg.debug("fetching cloudbet odds")
-    confirmation_response = await cloudbet_api.get(f'/v2/odds/events/{outcome.meta[outcome.provider.name]["eventId"]}')
+    confirmation_response = await cloudbet_api.get(f'/v2/odds/events/{outcome['meta']['cloudbet']["eventId"]}')
     event = CloudbetEvent(
         **confirmation_response
     )
@@ -60,10 +60,10 @@ async def check_odds_cloudbet(outcome: Outcome):
 
     # checking whether price has changed
     for o in event.outcomes:
-        if o.is_home and outcome.is_home or o.is_away and outcome.is_away:
+        if o.is_home and outcome['is_home'] or o.is_away and outcome['is_away']:
             if o.market.odds != outcome['market']['odds']:
                 lg.error(
-                    f"Cloudbet odds error: Latest price was {o.market.odds} but bet placed for {outcome.market.odds}")
+                    f"Cloudbet odds error: Latest price was {o.market.odds} but bet placed for {outcome['market']['odds']}")
 
     lg.debug("cloudbet odds ok")
 
