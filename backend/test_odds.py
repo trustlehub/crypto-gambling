@@ -142,11 +142,9 @@ async def task(event):
 async def main():
     odds = await get_odds()
     lg.debug("Finished fetching odds")
-    tasks = []
     for event in odds:
-        tasks.append(task(event))
+        await task(event)
 
-    await asyncio.gather(*tasks)
 
 
 if __name__ == "__main__":
