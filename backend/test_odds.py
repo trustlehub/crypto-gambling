@@ -50,6 +50,7 @@ async def get_odds() -> list[OddsCleaned]:
 
 async def check_odds_cloudbet(event, outcome):
     lg.debug("fetching cloudbet odds")
+    name = event.event
     confirmation_response = await cloudbet_api.get(f'/v2/odds/events/{event.meta['cloudbet']["eventId"]}')
     event = CloudbetEvent(
         **confirmation_response
@@ -62,7 +63,7 @@ async def check_odds_cloudbet(event, outcome):
         if o.is_home and outcome['is_home'] or o.is_away and outcome['is_away']:
             if o.market.odds != outcome['market']['odds']:
                 lg.error(
-                    f"Cloudbet odds error: Latest price was {o.market.odds} but bet placed for {outcome['market']['odds']}")
+                    f"Cloudbet odds error: Latest price was {o.market.odds} but odds are {outcome['market']['odds']} for event {name}")
 
     lg.debug("cloudbet odds ok")
 
@@ -86,8 +87,10 @@ async def check_odds_matchbook(event, outcome):
             odds_available = True
             break
     if not odds_available:
-        lg.error(f"Odds have changed for {event.event}")
-    lg.debug("matchbook odds ok")
+        lg.error(
+            f"Matchbook odds error: Odds have changed for {event.event}; expected {odds} but got {[price.decimal_odds for price in matchbook_runner.prices]}")
+    else:
+        lg.debug("matchbook odds ok")
 
 
 async def check_odds_polymarket(event, outcome):
@@ -105,7 +108,7 @@ async def check_odds_polymarket(event, outcome):
 
         if token['token_id'] == token_id:
             if token['price'] != price:
-                lg.error(f"Latest price was {token['price']} provided odds: {price}")
+                lg.error(f"Polymarket odds error: Latest price was {token['price']} provided odds: {price} for event {event.event}")
 
     lg.debug("polymarket odds ok")
 
