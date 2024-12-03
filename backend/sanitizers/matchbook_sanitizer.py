@@ -36,6 +36,9 @@ def matchbook_sanitizer(events: List[MatchbookEvent], db) -> tuple[list[Event], 
                     elif price.decimal_odds < lowest_price.decimal_odds:
                         lowest_price = price
 
+                if lowest_price is None:
+                    lg.error(f"Could not find the lowest price for {runner.name}")
+                    continue
                 # Prices are the lay bets placed by other users
                 db_outcome = Outcome(
                     name=runner.name,
