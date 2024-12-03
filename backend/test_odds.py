@@ -23,7 +23,7 @@ polymarket_api = PolymarketApiInstance()
 matchbook_api = MatchbookApiInstance()
 
 # get odds from API
-HOST = "http://localhost:8000"
+HOST = "http://209.250.228.247:8000"
 
 # Initialize the Polymarket client
 host = "https://clob.polymarket.com"
@@ -106,11 +106,16 @@ async def task(event):
     lay_outcome = event.lay_outcome_id
     back_outcome = event.back_outcome_id
     requests = [
-        aiohttp.ClientSession.get(f"{HOST}/get_outcome/{lay_outcome}"),
-        aiohttp.ClientSession.get(f"{HOST}/get_outcome/{back_outcome}"),
+        aiohttp.ClientSession().get(url=f"{HOST}/outcomes/{lay_outcome}"),
+        aiohttp.ClientSession().get(url=f"{HOST}/outcomes/{back_outcome}"),
     ]
     outcomes = await asyncio.gather(*requests)
-    outcomes = [Outcome(**outcome) for outcome in outcomes]
+    json_outcomes = []
+    for outcome in outcomes:
+        o = await outcome.json()
+        json_outcomes.append(o)
+
+    outcomes = [Outcome(**outcome) for outcome in json_outcomes]
     for outcome in outcomes:
         if outcome is None:
             continue

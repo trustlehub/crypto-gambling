@@ -9,6 +9,7 @@ from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from requests import Session
+from sqlalchemy.orm import joinedload
 
 from apis.cloudbet import CloudbetApiInstance
 from apis.matchbook import MatchbookApiInstance
@@ -82,8 +83,16 @@ class OrderDetails(BaseModel):
 
 @app.get("/outcomes/{outcome_id}")
 async def get_outcome(outcome_id: int, db: Session = Depends(get_db)):
-    outcome = db.query(Outcome).filter(Outcome.id == outcome_id).first()
+    outcome = (
+        db.query(Outcome)
+        .filter(Outcome.id == outcome_id)
+        .options(joinedload(Outcome.provider))  # Eager load the Provider
+        .first()
+    )
+
     return outcome
+
+
 @app.post("/trade/{outcome_id}")
 async def place_order(request: OrderDetails, outcome_id: int, db: Session = Depends(get_db)):
     try:
