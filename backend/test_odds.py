@@ -1,3 +1,4 @@
+import logging
 import os
 
 import aiohttp
@@ -8,6 +9,7 @@ from apis.cloudbet import CloudbetApiInstance
 from apis.matchbook import MatchbookApiInstance
 from apis.polymarket import PolymarketApiInstance
 from db import Outcome
+from log import setup_logger
 from models.cloudbet import CloudbetEvent
 from models.frontend import OddsCleaned
 from models.matchbook import MatchbookRunner
@@ -17,7 +19,7 @@ cloudbet_api = CloudbetApiInstance({
     'baseURL': 'https://sports-api.cloudbet.com/pub',
     'apiKey': "eyJhbGciOiJSUzI1NiIsImtpZCI6IkhKcDkyNnF3ZXBjNnF3LU9rMk4zV05pXzBrRFd6cEdwTzAxNlRJUjdRWDAiLCJ0eXAiOiJKV1QifQ.eyJhY2Nlc3NfdGllciI6InRyYWRpbmciLCJleHAiOjIwNDI0NDY5OTgsImlhdCI6MTcyNzA4Njk5OCwianRpIjoiYzc2ZTExNGItMDQyNS00YTU3LWE2ZWEtMjk3Yzg4NjM1NzVhIiwic3ViIjoiMGZiYjRjNjctMTExZi00ZTgxLTk0NGItMTMyNmNlMTQyYjhmIiwidGVuYW50IjoiY2xvdWRiZXQiLCJ1dWlkIjoiMGZiYjRjNjctMTExZi00ZTgxLTk0NGItMTMyNmNlMTQyYjhmIn0.ZTOj6aLXmyhxRn_G1ZtRgcRzoczrpz7n4DtcUKAZCfC9TbTByiAfAGb6IZ0C5yrn4yCPmaxn2SlA8Hi1Ie6iE4c-NbcyopPPq3-v4XR8-tE6bjNnTt_1OomqVdBM2TAmrwdAjc8F05QFUIav4WvPds-X08DQ3iIBiG7z-G1TiU1JdhJoMh58mmXNP4qrWz0Kk7woH4aefQqXwxtcG1BciaZxArR3BX-xWGHUWIDf76Kd5lqOA1wif7JCstOZX7tWAxsOLJlXbnU4RXz3K45dte2tXc3GB5hIdvB0PEg_a8-pmg12dhft4RjfitUEBwNktuvdGe2ZCLZpqC0DcSUXwQ"
 })
-
+lg = setup_logger("test", "/logs/test.log", logging.DEBUG)
 polymarket_api = PolymarketApiInstance()
 
 matchbook_api = MatchbookApiInstance()
@@ -48,6 +50,7 @@ async def get_odds() -> list[OddsCleaned]:
 
 
 async def check_odds_cloudbet(outcome: Outcome):
+    lg.debug("fetching cloudbet odds")
     confirmation_response = await cloudbet_api.get(f'/v2/odds/events/{outcome.meta[outcome.provider.name]["eventId"]}')
     event = CloudbetEvent(
         **confirmation_response
@@ -59,7 +62,10 @@ async def check_odds_cloudbet(outcome: Outcome):
     for o in event.outcomes:
         if o.is_home and outcome.is_home or o.is_away and outcome.is_away:
             if o.market.odds != outcome['market']['odds']:
-                print(f"Cloudbet odds error: Latest price was {o.market.odds} but bet placed for {outcome.market.odds}")
+                lg.error(
+                    f"Cloudbet odds error: Latest price was {o.market.odds} but bet placed for {outcome.market.odds}")
+
+    lg.debug("cloudbet odds ok")
 
 
 async def check_odds_matchbook(outcome):
@@ -69,6 +75,7 @@ async def check_odds_matchbook(outcome):
     odds = outcome['market']['odds']
 
     # checking whether price is still same
+    lg.debug("fetching matchbook odds")
     price_check = await matchbook_api.get(
         f"https://api.matchbook.com/edge/rest/events/{event_id}/markets/{market_id}/runners/{runner_id}"
         f"?include-prices=true&exchange-type=back-lay&side=lay")
@@ -80,7 +87,8 @@ async def check_odds_matchbook(outcome):
             odds_available = True
             break
     if not odds_available:
-        print(f"Odds have changed for {outcome['name']}")
+        lg.error(f"Odds have changed for {outcome['name']}")
+    lg.debug("matchbook odds ok")
 
 
 async def check_odds_polymarket(outcome, condition_id):
@@ -89,6 +97,7 @@ async def check_odds_polymarket(outcome, condition_id):
     price = float("%.3f" % (1 / outcome['market']['odds']))
 
     # Place the order using py-clob-client
+    lg.debug("fetching polymarket odds")
     market = client.get_market(
         condition_id=condition_id,
     )
@@ -97,9 +106,10 @@ async def check_odds_polymarket(outcome, condition_id):
 
         if token['token_id'] == token_id:
             if token['price'] != price:
-                print(token['price'], price)
-                raise Exception(
-                    f"Latest price was {token['price']} but bet placed for {price}. Try refreshing page")
+                lg.debug(token['price'], price)
+                lg.error(f"Latest price was {token['price']} provided odds: {price}")
+
+    lg.debug("polymarket odds ok")
 
 
 async def task(event):
@@ -114,9 +124,10 @@ async def task(event):
     for outcome in outcomes:
         o = await outcome.json()
         json_outcomes.append(o)
-        print(o)
+        lg.debug(o)
 
-    for outcome in outcomes:
+    lg.debug(f"Checking odds for event {event.event}")
+    for outcome in json_outcomes:
         if outcome is None:
             continue
         if outcome['provider']['name'] == "cloudbet":
@@ -125,12 +136,12 @@ async def task(event):
             await check_odds_matchbook(outcome)
         elif outcome['provider']['name'] == "polymarket":
             await check_odds_polymarket(outcome, event.meta['polymarket']['conditionId'])
-    print(f"Finished checking odds for event {event.name}")
+    lg.debug(f"Finished checking odds for event {event.event}")
 
 
 async def main():
     odds = await get_odds()
-    print("Finished fetching odds")
+    lg.debug("Finished fetching odds")
     tasks = []
     for event in odds:
         tasks.append(task(event))
@@ -142,4 +153,4 @@ if __name__ == "__main__":
     import asyncio
 
     asyncio.run(main())
-    print("Finished checking odds")
+    lg.debug("Finished checking odds")
