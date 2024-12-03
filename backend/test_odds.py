@@ -131,11 +131,11 @@ async def task(event):
         if outcome is None:
             continue
         if outcome['provider']['name'] == "cloudbet":
-            await check_odds_cloudbet(outcome)
+            await check_odds_cloudbet(event)
         elif outcome['provider']['name'] == "matchbook":
-            await check_odds_matchbook(outcome)
+            await check_odds_matchbook(event)
         elif outcome['provider']['name'] == "polymarket":
-            await check_odds_polymarket(outcome, event.meta['polymarket']['conditionId'])
+            await check_odds_polymarket(event, event.meta['polymarket']['conditionId'])
     lg.debug(f"Finished checking odds for event {event.event}")
 
 
