@@ -206,10 +206,10 @@ async def get_events(lay_as_back: bool = None, db: Session = Depends(get_db)):
                         o1.provider.name: {
                             **(o1.meta[
                                    o1.provider.name] if o1.meta is not None and o1.provider.name in o1.meta.keys() else {}),
-                            **(o2.market.meta[
-                                   o2.provider.name] if o2.market.meta is not None and o2.provider.name in o2.market.meta.keys() else {}),
-                            **(o2.event.meta[
-                                   o2.provider.name] if o2.event.meta is not None and o2.provider.name in o2.event.meta.keys() else {}),
+                            **(o1.market.meta[
+                                   o1.provider.name] if o1.market.meta is not None and o1.provider.name in o1.market.meta.keys() else {}),
+                            **(o1.event.meta[
+                                   o1.provider.name] if o1.event.meta is not None and o1.provider.name in o1.event.meta.keys() else {}),
                         },
                         o2.provider.name: {
                             **(o2.meta[
