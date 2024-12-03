@@ -123,10 +123,8 @@ async def task(event):
     for outcome in outcomes:
         o = await outcome.json()
         json_outcomes.append(o)
-        lg.debug(o)
 
     lg.debug(f"Checking odds for event {event.event}")
-    lg.debug(event)
     for outcome in json_outcomes:
         if outcome is None:
             continue
