@@ -31,9 +31,11 @@ def matchbook_sanitizer(events: List[MatchbookEvent], db) -> tuple[list[Event], 
                 # getting the lowest lay price. This is the price that is the best for the user
                 lowest_price: MatchbookPrice | None = None
                 for price in runner.prices:
-                    if lowest_price is None or price.decimal_odds < lowest_price.decimal_odds or lowest_price == 0:
+                    if lowest_price is None:
                         lowest_price = price
-                       
+                    elif price.decimal_odds < lowest_price.decimal_odds:
+                        lowest_price = price
+
                 # Prices are the lay bets placed by other users
                 db_outcome = Outcome(
                     name=runner.name,
