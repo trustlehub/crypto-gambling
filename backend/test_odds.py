@@ -8,7 +8,6 @@ from py_clob_client.constants import POLYGON
 from apis.cloudbet import CloudbetApiInstance
 from apis.matchbook import MatchbookApiInstance
 from apis.polymarket import PolymarketApiInstance
-from db import Outcome
 from log import setup_logger
 from models.cloudbet import CloudbetEvent
 from models.frontend import OddsCleaned
@@ -49,9 +48,9 @@ async def get_odds() -> list[OddsCleaned]:
             return cleaned_odds
 
 
-async def check_odds_cloudbet(outcome):
+async def check_odds_cloudbet(event, outcome):
     lg.debug("fetching cloudbet odds")
-    confirmation_response = await cloudbet_api.get(f'/v2/odds/events/{outcome['meta']['cloudbet']["event_id"]}')
+    confirmation_response = await cloudbet_api.get(f'/v2/odds/events/{event.meta['cloudbet']["event_id"]}')
     event = CloudbetEvent(
         **confirmation_response
     )
@@ -68,10 +67,10 @@ async def check_odds_cloudbet(outcome):
     lg.debug("cloudbet odds ok")
 
 
-async def check_odds_matchbook(outcome):
-    event_id = outcome['meta']['matchbook']['event_id']
-    market_id = outcome['meta']['matchbook']['market_id']
-    runner_id = outcome['meta']['matchbook']['runner_id']
+async def check_odds_matchbook(event, outcome):
+    event_id = event.meta['matchbook']['event_id']
+    market_id = event.meta['matchbook']['market_id']
+    runner_id = event.meta['matchbook']['runner_id']
     odds = outcome['market']['odds']
 
     # checking whether price is still same
@@ -87,15 +86,15 @@ async def check_odds_matchbook(outcome):
             odds_available = True
             break
     if not odds_available:
-        lg.error(f"Odds have changed for {outcome['name']}")
+        lg.error(f"Odds have changed for {event.event}")
     lg.debug("matchbook odds ok")
 
 
-async def check_odds_polymarket(outcome, condition_id):
+async def check_odds_polymarket(event, outcome):
     # Determine order side
-    token_id = outcome['meta']['polymarket']['clobTokenId']
+    token_id = event.meta['polymarket']['clobTokenId']
     price = float("%.3f" % (1 / outcome['market']['odds']))
-
+    condition_id = event.meta['polymarket']['conditionId']
     # Place the order using py-clob-client
     lg.debug("fetching polymarket odds")
     market = client.get_market(
@@ -131,11 +130,11 @@ async def task(event):
         if outcome is None:
             continue
         if outcome['provider']['name'] == "cloudbet":
-            await check_odds_cloudbet(event)
+            await check_odds_cloudbet(event, outcome)
         elif outcome['provider']['name'] == "matchbook":
-            await check_odds_matchbook(event)
+            await check_odds_matchbook(event, outcome)
         elif outcome['provider']['name'] == "polymarket":
-            await check_odds_polymarket(event, event.meta['polymarket']['conditionId'])
+            await check_odds_polymarket(event, outcome)
     lg.debug(f"Finished checking odds for event {event.event}")
 
 
@@ -144,7 +143,6 @@ async def main():
     lg.debug("Finished fetching odds")
     for event in odds:
         await task(event)
-
 
 
 if __name__ == "__main__":
