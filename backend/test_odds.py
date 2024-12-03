@@ -58,15 +58,15 @@ async def check_odds_cloudbet(outcome: Outcome):
     # checking whether price has changed
     for o in event.outcomes:
         if o.is_home and outcome.is_home or o.is_away and outcome.is_away:
-            if o.market.odds != outcome.market.odds:
+            if o.market.odds != outcome['market']['odds']:
                 print(f"Cloudbet odds error: Latest price was {o.market.odds} but bet placed for {outcome.market.odds}")
 
 
-async def check_odds_matchbook(outcome: Outcome):
-    event_id = outcome.meta['matchbook']['event_id']
-    market_id = outcome.meta['matchbook']['market_id']
-    runner_id = outcome.meta['matchbook']['runner_id']
-    odds = outcome.market.odds
+async def check_odds_matchbook(outcome):
+    event_id = outcome['meta']['matchbook']['event_id']
+    market_id = outcome['meta']['matchbook']['market_id']
+    runner_id = outcome['meta']['matchbook']['runner_id']
+    odds = outcome['market']['odds']
 
     # checking whether price is still same
     price_check = await matchbook_api.get(
@@ -80,17 +80,17 @@ async def check_odds_matchbook(outcome: Outcome):
             odds_available = True
             break
     if not odds_available:
-        print(f"Odds have changed for {outcome.name}")
+        print(f"Odds have changed for {outcome['name']}")
 
 
-async def check_odds_polymarket(outcome: Outcome):
+async def check_odds_polymarket(outcome, condition_id):
     # Determine order side
-    token_id = outcome.meta[outcome.provider.name]['clobTokenId']
-    price = float("%.3f" % (1 / outcome.market.odds))
+    token_id = outcome['meta']['polymarket']['clobTokenId']
+    price = float("%.3f" % (1 / outcome['market']['odds']))
 
     # Place the order using py-clob-client
     market = client.get_market(
-        condition_id=outcome.event.meta[outcome.provider.name]["conditionId"],
+        condition_id=condition_id,
     )
 
     for token in market['tokens']:
@@ -114,17 +114,17 @@ async def task(event):
     for outcome in outcomes:
         o = await outcome.json()
         json_outcomes.append(o)
+        print(o)
 
-    outcomes = [Outcome(**outcome) for outcome in json_outcomes]
     for outcome in outcomes:
         if outcome is None:
             continue
-        if outcome.provider.name == "cloudbet":
+        if outcome['provider']['name'] == "cloudbet":
             await check_odds_cloudbet(outcome)
-        elif outcome.provider.name == "matchbook":
+        elif outcome['provider']['name'] == "matchbook":
             await check_odds_matchbook(outcome)
-        elif outcome.provider.name == "polymarket":
-            await check_odds_polymarket(outcome)
+        elif outcome['provider']['name'] == "polymarket":
+            await check_odds_polymarket(outcome, event.meta['polymarket']['conditionId'])
     print(f"Finished checking odds for event {event.name}")
 
 
