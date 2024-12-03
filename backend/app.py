@@ -80,6 +80,10 @@ class OrderDetails(BaseModel):
     size: float
 
 
+@app.get("/outcomes/{outcome_id}")
+async def get_outcome(outcome_id: int, db: Session = Depends(get_db)):
+    outcome = db.query(Outcome).filter(Outcome.id == outcome_id).first()
+    return outcome
 @app.post("/trade/{outcome_id}")
 async def place_order(request: OrderDetails, outcome_id: int, db: Session = Depends(get_db)):
     try:
@@ -141,7 +145,6 @@ async def get_events(lay_as_back: bool = None, db: Session = Depends(get_db)):
 
         for o1, o2 in permutations(outcomes, 2):
             # Matched outcomes are the same outcomes from different providers
-            # so we want the non matched ones
 
             # If o1 is not bookmaker or o2 is not exchange, then we can't match them
             if not o1.provider.is_bookmaker or not o2.provider.is_exchange:
@@ -151,14 +154,13 @@ async def get_events(lay_as_back: bool = None, db: Session = Depends(get_db)):
             for matched_outcome in o1.matched_outcomes:
                 all_outcomes_matched_with_o1.extend(matched_outcome.outcomes)
 
-            # lg.debug("matched outcomes with o1")
-            # for i in all_outcomes_matched_with_o1:
-            #     lg.debug(f"{i.name}, {i.provider.name}")
             if o2 in all_outcomes_matched_with_o1:
                 # this means o2 was matched with o1 as similar outcomes. So most likely, they are the same team
                 lg.debug(f"{o2.name, o1.name}:  same teams")
 
             if o2 not in all_outcomes_matched_with_o1:
+                # this means o2 was not matched with o1 as similar outcomes. So most likely, they are different teams
+                # Therefore, discarded
                 continue
 
             elif o1.provider.name == o2.provider.name:
