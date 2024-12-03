@@ -4,7 +4,7 @@ from typing import List
 
 from db import Market, Outcome, Event, Provider
 from log import setup_logger
-from models.matchbook import MatchbookEvent
+from models.matchbook import MatchbookEvent, MatchbookPrice
 
 lg = setup_logger("matchbook_sanitizer", '/logs/matchbook_sanitizer.log', logging.DEBUG)
 
@@ -27,38 +27,44 @@ def matchbook_sanitizer(events: List[MatchbookEvent], db) -> tuple[list[Event], 
 
             for runner in market.runners:
                 # Runners are the team names (outcomes) in matchbook
-                for price in runner.prices:
-                    # Prices are the lay bets placed by other users
-                    db_outcome = Outcome(
-                        name=runner.name,
-                        meta={
-                            matchbook_provider.name: {
-                                'volume': runner.volume,
-                                'runner_id': runner.id,
-                                'market_id': runner.market_id,
-                                'event_id': runner.event_id,
-                            }
-                        },
-                        provider=matchbook_provider,
-                    )
-                    outcomes_list.append(db_outcome)
-                    markets_list.append(Market(
-                        name=market.name,
-                        odds=price.decimal_odds,
-                        meta={
-                            matchbook_provider.name: {
-                                "volume": market.volume,
-                                'last_updated': runner.last_price_update_time,
-                                'withdrawn': (market.withdrawn if hasattr(market, 'withdrawn') else None),
-                                'maxStake': price.available_amount,
-                                'currency': price.currency,
-                                'commission': 2 , # this means 2% commission
-                                'market_id': market.id
-                            }
-                        },
-                        outcome=db_outcome,
 
-                    ))
+                # getting the lowest lay price. This is the price that is the best for the user
+                lowest_price: MatchbookPrice | None = None
+                for price in runner.prices:
+                    if lowest_price is None or price.decimal_odds < lowest_price.decimal_odds or lowest_price == 0:
+                        lowest_price = price
+                       
+                # Prices are the lay bets placed by other users
+                db_outcome = Outcome(
+                    name=runner.name,
+                    meta={
+                        matchbook_provider.name: {
+                            'volume': runner.volume,
+                            'runner_id': runner.id,
+                            'market_id': runner.market_id,
+                            'event_id': runner.event_id,
+                        }
+                    },
+                    provider=matchbook_provider,
+                )
+                outcomes_list.append(db_outcome)
+                markets_list.append(Market(
+                    name=market.name,
+                    odds=lowest_price.decimal_odds,
+                    meta={
+                        matchbook_provider.name: {
+                            "volume": market.volume,
+                            'last_updated': runner.last_price_update_time,
+                            'withdrawn': (market.withdrawn if hasattr(market, 'withdrawn') else None),
+                            'maxStake': lowest_price.available_amount,
+                            'currency': lowest_price.currency,
+                            'commission': 2,  # this means 2% commission
+                            'market_id': market.id
+                        }
+                    },
+                    outcome=db_outcome,
+
+                ))
         if len(outcomes_list) > 0 and len(markets_list) > 0:
             event = Event(
                 name=event.name,
