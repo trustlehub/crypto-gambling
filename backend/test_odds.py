@@ -51,7 +51,7 @@ async def get_odds() -> list[OddsCleaned]:
 
 async def check_odds_cloudbet(outcome):
     lg.debug("fetching cloudbet odds")
-    confirmation_response = await cloudbet_api.get(f'/v2/odds/events/{outcome['meta']['cloudbet']["eventId"]}')
+    confirmation_response = await cloudbet_api.get(f'/v2/odds/events/{outcome['meta']['cloudbet']["event_id"]}')
     event = CloudbetEvent(
         **confirmation_response
     )
