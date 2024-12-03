@@ -87,7 +87,7 @@ async def get_outcome(outcome_id: int, db: Session = Depends(get_db)):
         db.query(Outcome)
         .filter(Outcome.id == outcome_id)
         .options(joinedload(Outcome.provider))  # Eager load the Provider
-        .first()
+        .first().to_dict()
     )
 
     return outcome
