@@ -8,7 +8,7 @@ from models.cloudbet import CloudbetEvent
 lg = setup_logger("cloudbet_sanitizer", '/logs/cloudbet_sanitizer.log', logging.DEBUG)
 
 
-def cloudbet_sanitizer(cloudbet_data: list[CloudbetEvent], db, no_commit=False) -> tuple[list[Event], Provider]:
+def cloudbet_sanitizer(cloudbet_data: list[CloudbetEvent], db=None, no_commit=False) -> tuple[list[Event], Provider]:
     events: list[Event] = []
     for event in cloudbet_data:
 
